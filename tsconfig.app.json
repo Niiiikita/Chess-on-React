@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    // Компилирует TS в JS, совместимый с ES2020 (поддерживается всеми современными браузерами и Vite)
+    "target": "ES2020",
+    // Подключает типы для ES2020, DOM (браузерные API), и for...of для итерируемых объектов
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    // Использует современный синтаксис модулей (import/export) без преобразования — Vite сам обрабатывает это
+    "module": "ESNext",
+    // Включает поддержку JSX и использует React.createElement без необходимости import React from 'react'
+    "jsx": "react-jsx",
+    // Указывает, откуда брать функции для JSX (React), если используется react-jsx
+    "jsxImportSource": "react",
+    // Включает строгие проверки типов (null/undefined, типы параметров, возврат из функций и т.д.) — рекомендуется
+    "strict": true,
+    // Позволяет импортировать CommonJS-модули как ES-модули, например import _ from 'lodash'
+    "esModuleInterop": true,
+    // Пропускает проверку типов в node_modules — ускоряет сборку
+    "skipLibCheck": true,
+    // Позволяет использовать import React from 'react' даже если модуль не экспортирует default явно
+    "allowSyntheticDefaultImports": true,
+    // Запрещает импорт файлов с неправильным регистром (например, import './Button'если файл называется button.tsx)
+    "forceConsistentCasingInFileNames": true,
+    // Современный способ разрешения модулей, подходящий для Vite, Webpack, esbuild — поддерживает ?react, *.svg
+    "moduleResolution": "bundler",
+    // Позволяет импортировать JSON-файлы как объекты, например import data from './data.json'
+    "resolveJsonModule": true,
+    // Позволяет использовать модули в качестве отдельных файлов, например import { Button } from './Button'
+    "isolatedModules": true,
+    // Vite сам генерирует JS — TypeScript только проверяет типы, не создаёт файлы
+    "noEmit": true,
+    // Базовый путь для абсолютных импортов
+    "baseUrl": ".",
+    // Псевдоним @/... → src/... , позволяет писать import Button from '@/components/Button'
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  // Указывает, что TypeScript должен проверять только файлы в папке src
+  "include": ["src"]
+}

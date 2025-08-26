@@ -1,0 +1,17 @@
+@font-face {
+  font-family: "RubikWetPaint";
+  src: url("/fonts/Rubik_Wet_Paint/RubikWetPaint-Regular.woff2") format("woff2"),
+    url("/fonts/Rubik_Wet_Paint/RubikWetPaint-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "EricaOne";
+  src: url("/fonts/Erica_One/EricaOne-Regular.woff2") format("woff2"),
+    url("/fonts/Erica_One/EricaOne-Regular.woff2") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

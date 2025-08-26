@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "composite": true, // Обязательно для references, позволяет TypeScript проверять порядок сборки
+    "noEmit": false, // Этот файл может генерировать .js (например, vite.config.js)
+    "outDir": "dist", // Куда складывать скомпилированные .js файлы (необязательно, но полезно)
+    "target": "ES2022", // Целевая версия JavaScript — поддерживается Node.js 18+
+    "module": "NodeNext", // Использует современные ESM-фичи Node.js:.mjs,.cjs,package.json#exports
+    "moduleResolution": "nodenext", // Современный способ разрешения модулей в Node.js
+    "strict": true, // Включает строгие проверки типов
+    "skipLibCheck": true, // Ускоряет сборку, пропуская проверку типов в node_modules
+    "esModuleInterop": true, // Позволяет импортировать CommonJS-модули как ES-модули
+    "allowSyntheticDefaultImports": true, // Позволяет import react from '@vitejs/plugin-react' даже если нет default
+    "resolveJsonModule": true // Позволяет импортировать JSON-файлы
+  },
+  "include": ["vite.config.ts", "scripts/**/*", "types/vite-env.d.ts"] // Только файлы, которые работают в Node.js
+}

@@ -1,0 +1,67 @@
+.boardContainer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr minmax(150px, 0.5fr);
+  justify-content: center;
+  /* align-items: flex-start; */
+  /* width: 100%; */
+  height: 100%;
+}
+
+.board {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  /* width: 100%; */
+  height: 100%;
+}
+
+.boardGame {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(50px, 100px));
+  grid-template-rows: repeat(8, minmax(50px, 1fr));
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); */
+  user-select: none;
+}
+
+.square {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+  user-select: none;
+  transition: background-color 0.2s ease-in;
+}
+
+.square:hover:has(.piece) {
+  background-color: #62cf54 !important;
+  cursor: pointer;
+  transition: background-color 0.1s ease-in;
+}
+
+.square:has(.move):hover {
+  background-color: #62cf54 !important;
+  cursor: pointer;
+}
+
+.move {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.2);
+  width: 100%;
+  height: 100%;
+  background-color: #382e30;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.6;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.lastMove {
+  background-color: #62cf54 !important;
+}

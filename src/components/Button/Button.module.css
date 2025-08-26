@@ -1,0 +1,15 @@
+.button {
+  font-family: "EricaOne";
+  padding: 10px;
+  border: none;
+  border-radius: 15px;
+  color: rgb(66, 23, 23);
+  background-color: chocolate;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.button:hover {
+  background-color: rgb(66, 23, 23);
+  color: chocolate;
+}

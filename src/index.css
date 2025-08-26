@@ -1,0 +1,44 @@
+@import "./styles/normalize.css";
+@import "./styles/fonts.css";
+
+:root {
+  font-family: "RubikWetPaint", "EricaOne", system-ui, Avenir, Helvetica, Arial,
+    sans-serif;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: "RubikWetPaint", "EricaOne", system-ui, Avenir, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  max-width: 100vw;
+  /* max-width: 1470px; */
+  height: 100vh;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+  padding: 0 100px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}

@@ -1,0 +1,22 @@
+.menuOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.menuOverlay h1 {
+  margin: 0;
+  /* font-family: "RubikWetPaint"; */
+  font-size: 64px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menuButton {
+  font-size: 24px;
+}

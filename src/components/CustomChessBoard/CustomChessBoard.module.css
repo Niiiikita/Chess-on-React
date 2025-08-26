@@ -1,0 +1,17 @@
+.customChessBoard {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center;
+  align-items: center; */
+  /* width: 100%; */
+  height: 100%;
+  border: 2px solid #333;
+  border-radius: 8px;
+}
+
+.customChessBoard p {
+  margin: 0;
+  font-family: "EricaOne";
+  font-size: 14px;
+  color: #555;
+}

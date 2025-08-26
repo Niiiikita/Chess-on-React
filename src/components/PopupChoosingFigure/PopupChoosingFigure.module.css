@@ -1,0 +1,47 @@
+.promotionModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 0 100px 0 100px;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.promotionModal h2 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.promotionOptions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.promotionButton {
+  display: flex;
+  align-items: center;
+  width: 148px;
+  height: 50px;
+  font-size: 18px;
+  user-select: none;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.promotionButton:active {
+  transform: translateY(5px);
+}
+
+.popupPieceIcon {
+  width: 57px;
+  height: 30px;
+}
