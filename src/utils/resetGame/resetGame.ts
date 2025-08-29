@@ -21,7 +21,6 @@ import type {
  * @param setHint - Функция для сброса состояния подсказки.
  */
 export function resetGame(
-  e: React.MouseEvent<HTMLButtonElement>,
   setBoard?: React.Dispatch<React.SetStateAction<PieceType[][]>>,
   setLastMove?: React.Dispatch<React.SetStateAction<LastMoveType>>,
   setPromotion?: React.Dispatch<React.SetStateAction<PromotionType>>,
@@ -33,9 +32,14 @@ export function resetGame(
   setCurrentPlayer?: React.Dispatch<React.SetStateAction<"white" | "black">>,
   setHint?: React.Dispatch<React.SetStateAction<string | null>>,
   setHasKingMoved?: React.Dispatch<React.SetStateAction<HasKingMovedType>>,
-  setHasRookMoved?: React.Dispatch<React.SetStateAction<HasRookMovedType>>
+  setHasRookMoved?: React.Dispatch<React.SetStateAction<HasRookMovedType>>,
+  setCapturedPieces?: React.Dispatch<
+    React.SetStateAction<{
+      white: PieceType[];
+      black: PieceType[];
+    }>
+  >
 ) {
-  e.preventDefault();
   // Сброс всех состояний
   if (setBoard) setBoard(setupInitialBoard());
   if (setLastMove) setLastMove(null);
@@ -55,4 +59,10 @@ export function resetGame(
       white: { left: false, right: false },
       black: { left: false, right: false },
     });
+  if (setCapturedPieces) {
+    setCapturedPieces({
+      white: [],
+      black: [],
+    });
+  }
 }

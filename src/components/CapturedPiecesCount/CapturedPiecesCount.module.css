@@ -1,0 +1,48 @@
+.capturedPieces {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  min-height: 96px;
+  border-radius: 8px;
+  background-color: bisque;
+  user-select: none;
+}
+
+.capturedPiecesBlack,
+.capturedPiecesWhite {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.capturedPiecesPiece {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.2s ease;
+}
+
+.capturedPiecesPiece:hover {
+  transform: scale(1.15);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .capturedPieces {
+    padding: 10px;
+  }
+  .capturedPiecesPiece {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .capturedPieces {
+    gap: 6px;
+  }
+  .capturedPiecesPiece {
+    width: 24px;
+    height: 24px;
+  }
+}

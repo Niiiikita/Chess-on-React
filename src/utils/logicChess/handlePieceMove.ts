@@ -1,29 +1,51 @@
-import { isCheckmate } from "./isCheckmate";
-import { isStalemate } from "./isStalemate";
+// import { isCheckmate } from "./isCheckmate";
+// import { isStalemate } from "./isStalemate";
 import { squareToCoords } from "../squareToCoords/squareToCoords";
-import type {
-  GameOverType,
-  LastMoveType,
-  PieceType,
-  PromotionType,
-} from "../typeBoard/types";
+import type { GameModeType } from "../typeBoard/types";
+import { ChessGameState } from "../typeBoard/ChessGameState";
+import { coordsToSquare } from "../coordsToSquare/coordsToSquare";
+import { makeMove } from "./makeMove";
 
+/**
+ * Обрабатывает перемещение шахматной фигуры на доске.
+ * Эта функция вызывается, когда фигура перетаскивается и отпускается на новой позиции.
+ * Выполняются различные проверки, такие как валидация хода, проверка очередности хода,
+ * обработка превращения пешки, а также проверка на мат или пат.
+ * @param e Событие перетаскивания, возникающее при отпускании фигуры.
+ * @param rowIdx Индекс строки целевой клетки.
+ * @param colIdx Индекс столбца целевой клетки.
+ * @param context Контекст игры, содержащий доску, игроков, ходы и др.
+ */
 export default function handlePieceMove(
   e: React.DragEvent<HTMLDivElement>,
-  board: PieceType[][],
   rowIdx: number,
   colIdx: number,
-  setBoard: React.Dispatch<React.SetStateAction<PieceType[][]>>,
-  setLastMove: React.Dispatch<React.SetStateAction<LastMoveType>>,
-  setPromotion: React.Dispatch<React.SetStateAction<PromotionType>>,
-  setGameOver: React.Dispatch<React.SetStateAction<GameOverType>>,
-  setPossibleMove: React.Dispatch<React.SetStateAction<string[]>>
+  context: ChessGameState & { gameState: GameModeType }
 ) {
+  const {
+    board,
+    currentPlayer,
+    // setCurrentPlayer,
+    possibleMove,
+    setBoard,
+    // setLastMove,
+    setPromotion,
+    // setGameOver,
+    setPossibleMove,
+    setHint,
+    gameOver,
+    promotion,
+  } = context;
+
   e.preventDefault();
 
-  // Очищаем список возможных ходов
-  setPossibleMove([]);
+  // 1. Если есть активное превращение, нельзя ходить
+  if (promotion) return;
 
+  // 2. Если игра окончена, нельзя ходить
+  if (gameOver) return;
+
+  // 3. Получаем, откуда началось перетаскивание
   const fromSquare = e.dataTransfer?.getData("from");
   if (!fromSquare) return;
 
@@ -31,44 +53,67 @@ export default function handlePieceMove(
   const movedPiece = board[fromRow][fromCol];
   if (!movedPiece) return;
 
-  // Проверка: это пешка и она дошла до края?
+  // 4. Проверяем, ходит ли текущий игрок?
+  if (movedPiece.color !== currentPlayer) {
+    setHint(`Сейчас ход ${currentPlayer === "white" ? "белых" : "чёрных"}!`);
+    setTimeout(() => setHint(null), 1500);
+    return;
+  }
+
+  // 5. Проверяем, можно ли ходить?
+  const toSquare = coordsToSquare(rowIdx, colIdx);
+  if (!possibleMove.includes(toSquare)) {
+    setHint("Нельзя походить на это поле!");
+    setTimeout(() => setHint(null), 1500);
+    return;
+  }
+
+  // 6. Очищаем возможные ходы
+  setPossibleMove([]);
+
+  // 7. Проверяем, пешка дошла до края
   if (movedPiece.type === "pawn" && (rowIdx === 0 || rowIdx === 7)) {
-    // Создаём новую доску, но НЕ обновляем её сразу
     const newBoard = board.map((row) => [...row]);
-    newBoard[rowIdx][colIdx] = movedPiece; // временно ставим пешку
-    setBoard(newBoard); // обновляем доску, чтобы пешка стояла
+    newBoard[rowIdx][colIdx] = movedPiece;
+    setBoard(newBoard);
 
-    newBoard[fromRow][fromCol] = null; // удаляем старую пешку
+    newBoard[fromRow][fromCol] = null;
 
-    // Устанавливаем состояние превращения
+    // Устанавливаем превращение
     setPromotion({
       row: rowIdx,
       col: colIdx,
       color: movedPiece.color,
     });
 
-    // Не обновляем lastMove, selectedFrom и т.д. — это сделает PopupChoosingFigure
     return;
   }
 
-  // Обычный ход
-  const newBoard = board.map((row) => [...row]);
-  newBoard[rowIdx][colIdx] = movedPiece;
-  newBoard[fromRow][fromCol] = null;
+  makeMove(
+    { row: fromRow, col: fromCol },
+    { row: rowIdx, col: colIdx },
+    context
+  );
 
-  setBoard(newBoard);
-  setLastMove({
-    from: [fromRow, fromCol],
-    to: [rowIdx, colIdx],
-    piece: movedPiece,
-  });
+  // // 8. Обычный ход
+  // const newBoard = board.map((r) => [...r]);
+  // newBoard[rowIdx][colIdx] = movedPiece;
+  // newBoard[fromRow][fromCol] = null;
 
-  const opponentColor = movedPiece.color === "white" ? "black" : "white";
+  // setBoard(newBoard);
+  // setLastMove({
+  //   from: [fromRow, fromCol],
+  //   to: [rowIdx, colIdx],
+  //   piece: movedPiece,
+  // });
 
-  // После каждого хода проверяем на: мат или пат
-  if (isCheckmate(newBoard, opponentColor)) {
-    setGameOver("checkmate");
-  } else if (isStalemate(newBoard, opponentColor)) {
-    setGameOver("stalemate");
-  }
+  // setCurrentPlayer(movedPiece.color === "white" ? "black" : "white");
+
+  // // === 9. ПРОВЕРКА МАТА/ПАТА ===
+  // const opponentColor = movedPiece.color === "white" ? "black" : "white";
+  // if (isCheckmate(newBoard, opponentColor)) {
+  //   setGameOver("checkmate");
+  // } else if (isStalemate(newBoard, opponentColor)) {
+  //   setGameOver("stalemate");
+  // }
 }

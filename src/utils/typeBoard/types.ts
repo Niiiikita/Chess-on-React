@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
+import { ChessGameState } from "./ChessGameState";
 
-export type GameMode = "menu" | "vs-ai" | "local" | "online";
+export type GameModeType = "menu" | "vs-ai" | "local" | "online";
 
 export type CurrentPlayerType = "white" | "black";
 
@@ -47,7 +48,7 @@ export type PieceProps = {
   };
   coordsRow: number;
   coordsCol: number;
-  setPossibleMove: React.Dispatch<React.SetStateAction<string[]>>;
+  context: ChessGameState;
 };
 
 export type LastMoveType = {
@@ -83,4 +84,9 @@ export type HasRookMovedType = {
     left: boolean;
     right: boolean;
   };
+};
+
+export type CapturedPiecesType = {
+  white: PieceType[];
+  black: PieceType[];
 };

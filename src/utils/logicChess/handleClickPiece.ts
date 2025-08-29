@@ -1,11 +1,6 @@
+import { useChessGame } from "@/hooks/useChessGame";
 import { coordsToSquare } from "../coordsToSquare/coordsToSquare";
-import type {
-  GameMode,
-  HasKingMovedType,
-  HasRookMovedType,
-  LastMoveType,
-  PieceType,
-} from "../typeBoard/types";
+import type { GameModeType, PieceType } from "../typeBoard/types";
 import { getLegalMoves } from "./getLegalMoves";
 import { makeMove } from "./makeMove";
 
@@ -14,35 +9,22 @@ export function handleClickPiece(
   piece: PieceType,
   rowIdx: number,
   colIdx: number,
-  possibleMove: string[],
-  setPossibleMove: React.Dispatch<React.SetStateAction<string[]>>,
-  board: PieceType[][],
-  lastMove: LastMoveType,
-  selectedFrom: { row: number; col: number } | null,
-  setSelectedFrom: React.Dispatch<
-    React.SetStateAction<{ row: number; col: number } | null>
-  >,
-  setBoard: React.Dispatch<React.SetStateAction<PieceType[][]>>,
-  setLastMove: React.Dispatch<React.SetStateAction<LastMoveType>>,
-  setPromotion: React.Dispatch<
-    React.SetStateAction<{
-      row: number;
-      col: number;
-      color: "white" | "black";
-    } | null>
-  >,
-  setGameOver: React.Dispatch<
-    React.SetStateAction<"checkmate" | "stalemate" | null>
-  >,
-  setHasKingMoved: React.Dispatch<React.SetStateAction<HasKingMovedType>>,
-  setHasRookMoved: React.Dispatch<React.SetStateAction<HasRookMovedType>>,
-  hasKingMoved: HasKingMovedType,
-  hasRookMoved: HasRookMovedType,
-  currentPlayer: "white" | "black",
-  setCurrentPlayer: React.Dispatch<React.SetStateAction<"white" | "black">>,
-  setHint: React.Dispatch<React.SetStateAction<string | null>>,
-  gameState?: GameMode
+  context: ReturnType<typeof useChessGame> & { gameState: GameModeType }
 ) {
+  // Получаем контекст
+  const {
+    possibleMove,
+    setPossibleMove,
+    board,
+    lastMove,
+    selectedFrom,
+    setSelectedFrom,
+    hasKingMoved,
+    hasRookMoved,
+    currentPlayer,
+    setHint,
+  } = context;
+
   e.preventDefault();
 
   // 1. Если уже выбрана фигура и текущее поле — в списке возможных ходов
@@ -51,23 +33,7 @@ export function handleClickPiece(
 
     // Проверяем, можно ли сюда пойти
     if (possibleMove.includes(currentSquare)) {
-      makeMove(
-        selectedFrom,
-        { row: rowIdx, col: colIdx },
-        board,
-        setBoard,
-        // lastMove,
-        setLastMove,
-        setSelectedFrom,
-        setPossibleMove,
-        setPromotion,
-        setGameOver,
-        setHasKingMoved,
-        setHasRookMoved,
-        currentPlayer,
-        setCurrentPlayer,
-        gameState
-      );
+      makeMove(selectedFrom, { row: rowIdx, col: colIdx }, { ...context });
 
       return;
     }
@@ -77,22 +43,22 @@ export function handleClickPiece(
     setSelectedFrom(null);
   }
 
-  // 2. Если клик по фигуре и фигура того же цвета — показываем возможные ходы
-  if (piece && piece.color === currentPlayer) {
-    const moves = getLegalMoves(
-      piece,
-      rowIdx,
-      colIdx,
-      board,
-      lastMove,
-      hasKingMoved,
-      hasRookMoved
-    );
-
-    setPossibleMove(moves);
-    setSelectedFrom({ row: rowIdx, col: colIdx });
-
-    // console.log(selectedFrom);
+  // 2. Если клик по фигуре, проверяем, может ли она ходить
+  if (piece) {
+    // Только если фигура того же цвета, показываем ходы
+    if (piece.color === currentPlayer) {
+      const moves = getLegalMoves(
+        piece,
+        rowIdx,
+        colIdx,
+        board,
+        lastMove,
+        hasKingMoved,
+        hasRookMoved
+      );
+      setPossibleMove(moves);
+      setSelectedFrom({ row: rowIdx, col: colIdx });
+    }
   }
 
   // 3. Если сейчас ход другого цвета — показываем сообщение, что ход другого цвета

@@ -1,20 +1,35 @@
 import { QueenWhite } from "@/components/ChessPiece/White/QueenWhite";
 import { QueenBlack } from "@/components/ChessPiece/Black/QueenBlack";
 import clsx from "clsx";
-import styles from "./CurrentPlayerComponent.module.css";
 import Button from "../Button/Button";
-import { GameMode } from "@/utils/typeBoard/types";
+import { CapturedPiecesType, GameModeType } from "@/utils/typeBoard/types";
+import CapturedPiecesCount from "../CapturedPiecesCount/CapturedPiecesCount";
+import styles from "./CurrentPlayerComponent.module.css";
 
+/**
+ * Отображает индикатор текущего игрока и кнопки управления игрой.
+ * Этот компонент показывает фигуру текущего игрока (ферзя) и текстовое обозначение,
+ * чей сейчас ход. Также предоставляет кнопки для возврата в меню или
+ * перезапуска игры.
+ * @param props - Свойства компонента.
+ * @param props.currentPlayer - Текущий игрок, либо "white", либо "black".
+ * @param props.setGameState - Функция для установки состояния игры, используется для перехода в меню.
+ * @param props.resetGame - Функция для сброса игры к начальному состоянию.
+ * @param props.className - Дополнительные классы для стилизации (необязательно).
+ * @returns Отрендеренный компонент, отображающий текущего игрока и кнопки управления.
+ */
 export default function CurrentPlayerComponent({
   currentPlayer,
   setGameState,
   resetGame,
   className,
+  capturedPieces,
 }: {
   currentPlayer: "white" | "black";
-  setGameState: React.Dispatch<React.SetStateAction<GameMode>>;
-  resetGame: (e: React.MouseEvent<HTMLButtonElement>) => void; // ✅ Только event
+  setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
+  resetGame: () => void;
   className?: string;
+  capturedPieces: CapturedPiecesType;
 }) {
   return (
     <div className={clsx(styles.advanceContainer, className)}>
@@ -35,6 +50,9 @@ export default function CurrentPlayerComponent({
           </span>
         </div>
       </div>
+
+      <CapturedPiecesCount captured={capturedPieces} />
+
       <Button
         className={clsx(styles.advanceContainerNewGame)}
         onClick={() => setGameState("menu")}

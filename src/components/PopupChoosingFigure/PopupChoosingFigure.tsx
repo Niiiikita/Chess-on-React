@@ -6,13 +6,10 @@ import { BishopWhite } from "../ChessPiece/White/BishopWhite";
 import { KnightWhite } from "../ChessPiece/White/KnightWhite";
 import { QueenWhite } from "../ChessPiece/White/QueenWhite";
 import { RookWhite } from "../ChessPiece/White/RookWhite";
-import type {
-  LastMoveType,
-  PieceType,
-  PromotionType,
-  SelectedFromType,
-} from "../../utils/typeBoard/types";
+import type { GameModeType, PieceType } from "../../utils/typeBoard/types";
 import Button from "../Button/Button";
+import { useChessGame } from "@/hooks/useChessGame";
+import { makeAIMove } from "@/utils/makeAIMove/makeAIMove";
 import styles from "./PopupChoosingFigure.module.css";
 
 const pieceToRussian: Record<
@@ -38,23 +35,22 @@ const pieceIconMap: Record<string, React.ReactNode> = {
   knight_black: <KnightBlack className={styles.popupPieceIcon} />,
 };
 
-export default function PopupChoosingFigure({
-  promotion,
-  board,
-  setBoard,
-  setPromotion,
-  setLastMove,
-  setSelectedFrom,
-  setPossibleMove,
-}: {
-  promotion: PromotionType;
-  board: PieceType[][];
-  setBoard: React.Dispatch<React.SetStateAction<PieceType[][]>>;
-  setPromotion: React.Dispatch<React.SetStateAction<PromotionType>>;
-  setLastMove: React.Dispatch<React.SetStateAction<LastMoveType>>;
-  setSelectedFrom: React.Dispatch<React.SetStateAction<SelectedFromType>>;
-  setPossibleMove: React.Dispatch<React.SetStateAction<string[]>>;
-}) {
+export default function PopupChoosingFigure(
+  context: ReturnType<typeof useChessGame> & { gameState: GameModeType }
+) {
+  const {
+    gameState,
+    promotion,
+    board,
+    setBoard,
+    setPromotion,
+    setLastMove,
+    setSelectedFrom,
+    setPossibleMove,
+    currentPlayer,
+    setCurrentPlayer,
+  } = context;
+
   return (
     <div className={styles.promotionModal}>
       <h2>Выберите фигуру</h2>
@@ -95,6 +91,26 @@ export default function PopupChoosingFigure({
                 setSelectedFrom(null);
                 setPossibleMove([]);
                 setPromotion(null);
+
+                // СМЕНА ИГРОКА ПОСЛЕ ПРЕВРАЩЕНИЯ
+                setCurrentPlayer(currentPlayer === "white" ? "black" : "white");
+
+                // ЕСЛИ РЕЖИМ "vs-ai" И ХОДИЛ БЕЛЫЙ — БОТ ДЕЛАЕТ ХОД
+                if (gameState === "vs-ai" && newPiece.color === "white") {
+                  setTimeout(() => {
+                    makeAIMove({
+                      ...context,
+                      board: updatedBoard,
+                      currentPlayer: "black",
+                      lastMove: {
+                        from: [promotion.row, promotion.col],
+                        to: [promotion.row, promotion.col],
+                        piece: newPiece,
+                      },
+                      gameState: "vs-ai" as const,
+                    });
+                  }, 600);
+                }
               }
             }}
           >
