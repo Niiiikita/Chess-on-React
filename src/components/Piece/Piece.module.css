@@ -6,3 +6,29 @@
   height: 50px;
   /* cursor: pointer; */
 }
+
+.piece {
+  transition: transform 0.3s ease-in-out;
+}
+
+.pieceAnimating {
+  animation: lift 0.3s ease-in, drop 0.2s ease-out 0.1s;
+}
+
+@keyframes lift {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes drop {
+  0% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

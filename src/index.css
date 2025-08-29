@@ -16,6 +16,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.light {
+  --bg: #c2a8a8;
+  --text: #000;
+  --board-light: #f0d9b5;
+  --board-dark: #b58863;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -32,12 +39,23 @@ body {
   max-width: 100vw;
   /* max-width: 1470px; */
   height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s;
+}
+
+.square {
+  background: var(--board-light);
+}
+
+.square:nth-child(even) {
+  background: var(--board-dark);
 }
 
 #root {
   display: flex;
   justify-content: center;
-  padding: 0 100px;
+  padding: 20px 100px;
   width: 100%;
   height: 100%;
   text-align: center;

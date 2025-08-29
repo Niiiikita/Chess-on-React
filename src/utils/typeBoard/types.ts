@@ -1,5 +1,4 @@
 import type { ReactElement } from "react";
-import { ChessGameState } from "./ChessGameState";
 
 export type GameModeType = "menu" | "vs-ai" | "local" | "online";
 
@@ -42,13 +41,10 @@ export type PieceSymbols = {
 };
 
 export type PieceProps = {
-  piece: {
-    type: "pawn" | "rook" | "knight" | "bishop" | "queen" | "king";
-    color: "white" | "black";
-  };
-  coordsRow: number;
-  coordsCol: number;
-  context: ChessGameState;
+  piece: PieceType;
+  isLastMoveFrom: boolean;
+  isLastMoveTo: boolean;
+  onDragStart: (e: React.DragEvent) => void;
 };
 
 export type LastMoveType = {
@@ -89,4 +85,11 @@ export type HasRookMovedType = {
 export type CapturedPiecesType = {
   white: PieceType[];
   black: PieceType[];
+};
+
+export type Settings = {
+  theme: "light" | "dark";
+  highlightMoves: boolean;
+  animations: boolean;
+  sound: boolean;
 };

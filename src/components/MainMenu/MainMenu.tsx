@@ -1,4 +1,6 @@
+import { useState } from "react";
 import Button from "../Button/Button";
+import SettingsModal from "../SettingsModal/SettingsModal";
 import styles from "./MainMenu.module.css";
 
 export default function MainMenu({
@@ -6,10 +8,16 @@ export default function MainMenu({
   onStartVsAI,
   onStartOnline,
 }: {
+  onStartGame: () => void;
   onStartLocal: () => void;
   onStartVsAI: () => void;
   onStartOnline: () => void;
 }) {
+  const [showSettings, setShowSettings] = useState(false);
+
+  if (showSettings) {
+    return <SettingsModal onBack={() => setShowSettings(false)} />;
+  }
   return (
     <div className={styles.menuOverlay}>
       <h1>Шахматы</h1>
@@ -32,7 +40,12 @@ export default function MainMenu({
         >
           Играть онлайн
         </Button>
-        <Button className={styles.menuButton}>Настройки</Button>
+        <Button
+          className={styles.menuButton}
+          onClick={() => setShowSettings(true)}
+        >
+          Настройки
+        </Button>
       </div>
     </div>
   );

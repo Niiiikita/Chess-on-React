@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { PieceType } from "@/utils/typeBoard/types";
 import { pieceSymbols } from "../Icons/Icons";
 import styles from "./CapturedPiecesCount.module.css";
@@ -18,7 +19,9 @@ type CapturedPiecesProps = {
  * @param captured Объект, содержащий массивы захваченных фигур для каждого цвета (черные и белые)
  * @returns JSX компонент, отображающий количество и символы захваченных фигур
  */
-export default function CapturedPiecesCount({ captured }: CapturedPiecesProps) {
+export default memo(function CapturedPiecesCount({
+  captured,
+}: CapturedPiecesProps) {
   return (
     <div className={styles.capturedPieces}>
       {/* Съеденные чёрные фигуры (отображаются сверху) */}
@@ -46,4 +49,4 @@ export default function CapturedPiecesCount({ captured }: CapturedPiecesProps) {
       </div>
     </div>
   );
-}
+});

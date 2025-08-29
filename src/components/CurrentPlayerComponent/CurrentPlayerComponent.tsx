@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { QueenWhite } from "@/components/ChessPiece/White/QueenWhite";
 import { QueenBlack } from "@/components/ChessPiece/Black/QueenBlack";
 import clsx from "clsx";
@@ -18,7 +19,7 @@ import styles from "./CurrentPlayerComponent.module.css";
  * @param props.className - Дополнительные классы для стилизации (необязательно).
  * @returns Отрендеренный компонент, отображающий текущего игрока и кнопки управления.
  */
-export default function CurrentPlayerComponent({
+export default memo(function CurrentPlayerComponent({
   currentPlayer,
   setGameState,
   resetGame,
@@ -67,4 +68,4 @@ export default function CurrentPlayerComponent({
       </Button>
     </div>
   );
-}
+});

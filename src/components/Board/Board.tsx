@@ -1,17 +1,14 @@
-import Piece from "../Piece/Piece";
+import { useCallback } from "react";
+import { useChessGame } from "@/hooks/useChessGame";
+import { usePieceDrag } from "@/hooks/usePieceDrag";
 import PopupChoosingFigure from "../PopupChoosingFigure/PopupChoosingFigure";
 import GameOverModal from "../GameOver/GameOverModal";
+import Square from "../Square/Square";
 import Hint from "../Hint/Hint";
 import CurrentPlayerComponent from "../CurrentPlayerComponent/CurrentPlayerComponent";
-import handlePieceMove from "@/utils/logicChess/handlePieceMove";
-import { handleClickPiece } from "@/utils/logicChess/handleClickPiece";
-import { coordsToSquare } from "@/utils/coordsToSquare/coordsToSquare";
 import type { GameModeType } from "@/utils/typeBoard/types";
 import { resetGame } from "@/utils/resetGame/resetGame";
-import { useChessGame } from "@/hooks/useChessGame";
-import clsx from "clsx";
 import styles from "./Board.module.css";
-import { handlePieceEnter } from "@/utils/logicChess/handlePieceEnter";
 
 export default function Board({
   gameState,
@@ -45,9 +42,42 @@ export default function Board({
     setHighlightedSquare,
   } = game;
 
-  // console.log("Состояние выбранной фигуры:", selectedFrom);
-  // console.log("Состояние последнего хода:", lastMove);
-  // console.log("Состояние игрока", currentPlayer);
+  const { handleDragStart } = usePieceDrag({
+    board: game.board,
+    lastMove: game.lastMove,
+    hasKingMoved: game.hasKingMoved,
+    hasRookMoved: game.hasRookMoved,
+    currentPlayer: game.currentPlayer,
+    setPossibleMove: game.setPossibleMove,
+  });
+
+  const stableResetGame = useCallback(() => {
+    resetGame(
+      setBoard,
+      setLastMove,
+      setPromotion,
+      setGameOver,
+      setPossibleMove,
+      setSelectedFrom,
+      setCurrentPlayer,
+      setHint,
+      setHasKingMoved,
+      setHasRookMoved,
+      setCapturedPieces
+    );
+  }, [
+    setBoard,
+    setLastMove,
+    setPromotion,
+    setGameOver,
+    setPossibleMove,
+    setSelectedFrom,
+    setCurrentPlayer,
+    setHint,
+    setHasKingMoved,
+    setHasRookMoved,
+    setCapturedPieces,
+  ]);
 
   return (
     <div className={styles.boardContainer}>
@@ -56,7 +86,6 @@ export default function Board({
           {board.map((row, rowIdx) =>
             row.map((piece, colIdx) => {
               const isLight = (rowIdx + colIdx) % 2 === 0;
-              const squareColor = isLight ? "#f0d9b5" : "#b58863";
 
               // Проверяем, была ли эта клетка частью последнего хода
               const isLastMoveFrom =
@@ -64,53 +93,26 @@ export default function Board({
                 lastMove.from[0] === rowIdx &&
                 lastMove.from[1] === colIdx;
 
-              return (
-                <div
-                  key={`${rowIdx}-${colIdx}`}
-                  className={clsx(
-                    styles.square,
-                    `${isLastMoveFrom ? styles.lastMoveFrom : ""}`
-                  )}
-                  style={{ backgroundColor: squareColor }}
-                  onDragEnter={(e) =>
-                    handlePieceEnter(
-                      e,
-                      rowIdx,
-                      colIdx,
-                      possibleMove,
-                      currentPlayer,
-                      setHighlightedSquare
-                    )
-                  }
-                  onDragLeave={() => setHighlightedSquare(null)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    handlePieceMove(e, rowIdx, colIdx, {
-                      ...game,
-                      gameState,
-                    });
-                    setHighlightedSquare(null); // сброс после drop
-                  }}
-                  onClick={(e) => {
-                    handleClickPiece(e, piece, rowIdx, colIdx, {
-                      ...game,
-                      gameState,
-                    });
-                  }}
-                >
-                  {possibleMove.includes(coordsToSquare(rowIdx, colIdx)) && (
-                    <div className={styles.move} />
-                  )}
+              const isLastMoveTo =
+                lastMove &&
+                lastMove.to[0] === rowIdx &&
+                lastMove.to[1] === colIdx;
 
-                  {piece && (
-                    <Piece
-                      piece={piece}
-                      coordsRow={rowIdx}
-                      coordsCol={colIdx}
-                      context={game}
-                    />
-                  )}
-                </div>
+              return (
+                <Square
+                  key={`${rowIdx}-${colIdx}`}
+                  piece={piece}
+                  rowIdx={rowIdx}
+                  colIdx={colIdx}
+                  isLight={isLight}
+                  isLastMoveFrom={!!isLastMoveFrom}
+                  isLastMoveTo={!!isLastMoveTo}
+                  possibleMove={possibleMove}
+                  game={game}
+                  gameState={gameState}
+                  handleDragStart={handleDragStart}
+                  setHighlightedSquare={setHighlightedSquare}
+                />
               );
             })
           )}
@@ -142,21 +144,7 @@ export default function Board({
         currentPlayer={currentPlayer}
         setGameState={setGameState}
         capturedPieces={capturedPieces}
-        resetGame={() =>
-          resetGame(
-            setBoard,
-            setLastMove,
-            setPromotion,
-            setGameOver,
-            setPossibleMove,
-            setSelectedFrom,
-            setCurrentPlayer,
-            setHint,
-            setHasKingMoved,
-            setHasRookMoved,
-            setCapturedPieces
-          )
-        }
+        resetGame={stableResetGame}
       />
 
       {gameOver && (
