@@ -17,7 +17,9 @@ export default function MainMenu({
 
   return (
     <div className={styles.menuOverlay}>
-      <h1>♔ Шахматы ♚</h1>
+      <h1>
+        <span>♔</span> Шахматы <span>♚</span>
+      </h1>
       <div className={styles.menu}>
         <Button
           onClick={() => onStartGame("local")}

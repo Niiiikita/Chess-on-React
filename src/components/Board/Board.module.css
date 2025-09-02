@@ -30,6 +30,6 @@
   grid-template-rows: repeat(8, minmax(30px, 1fr));
   justify-content: center;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   user-select: none;
 }

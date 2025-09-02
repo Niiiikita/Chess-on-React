@@ -6,9 +6,10 @@
 }
 
 .menuOverlay h1 {
+  display: flex;
+  align-items: center;
   margin: 0;
-  /* font-family: "RubikWetPaint"; */
-  font-size: 64px;
+  font-size: clamp(40px, 10vw, 64px);
 }
 
 .menu {
@@ -18,5 +19,5 @@
 }
 
 .menuButton {
-  font-size: 24px;
+  font-size: clamp(16px, 5vw, 32px);
 }
