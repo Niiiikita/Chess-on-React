@@ -1,41 +1,38 @@
 import { useState } from "react";
-import Button from "../Button/Button";
 import SettingsModal from "../SettingsModal/SettingsModal";
+import Button from "../Button/Button";
+import { GameModeType } from "@/utils/typeBoard/types";
 import styles from "./MainMenu.module.css";
 
 export default function MainMenu({
-  onStartLocal,
-  onStartVsAI,
-  onStartOnline,
+  onStartGame,
 }: {
-  onStartGame: () => void;
-  onStartLocal: () => void;
-  onStartVsAI: () => void;
-  onStartOnline: () => void;
+  onStartGame: (mode: GameModeType) => void;
 }) {
   const [showSettings, setShowSettings] = useState(false);
 
   if (showSettings) {
     return <SettingsModal onBack={() => setShowSettings(false)} />;
   }
+
   return (
     <div className={styles.menuOverlay}>
-      <h1>Шахматы</h1>
+      <h1>♔ Шахматы ♚</h1>
       <div className={styles.menu}>
         <Button
-          onClick={onStartLocal}
+          onClick={() => onStartGame("local")}
           className={styles.menuButton}
         >
           Играть вдвоем
         </Button>
         <Button
-          onClick={onStartVsAI}
+          onClick={() => onStartGame("vs-ai")}
           className={styles.menuButton}
         >
           Играть с компьютером
         </Button>
         <Button
-          onClick={onStartOnline}
+          onClick={() => onStartGame("online")}
           className={styles.menuButton}
         >
           Играть онлайн

@@ -1,4 +1,4 @@
-export function KingWhite(props: React.SVGProps<SVGSVGElement>) {
+export default function KingWhite(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       version="1.1"

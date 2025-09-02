@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { pieceSymbols } from "../Icons/Icons";
-import { PieceProps } from "@/utils/typeBoard/types";
+import pieceIconCache from "@/utils/pieceIconCache/pieceIconCache";
+import { PieceType } from "@/utils/typeBoard/types";
 import clsx from "clsx";
 import styles from "./Piece.module.css";
 
@@ -9,8 +9,15 @@ export default memo(function Piece({
   isLastMoveFrom,
   isLastMoveTo,
   onDragStart,
-}: PieceProps) {
-  const symbol = piece && pieceSymbols[piece.color][piece.type];
+}: {
+  piece: PieceType;
+  isLastMoveFrom: boolean;
+  isLastMoveTo: boolean;
+  onDragStart: (e: React.DragEvent) => void;
+}) {
+  if (!piece) return null;
+
+  const Icon = pieceIconCache[`${piece.type}_${piece.color}`];
 
   return (
     <div
@@ -21,7 +28,7 @@ export default memo(function Piece({
       onDragStart={onDragStart}
       draggable
     >
-      {symbol}
+      <Icon style={{ width: "100%", height: "100%" }} />
     </div>
   );
 });

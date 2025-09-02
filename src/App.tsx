@@ -1,14 +1,45 @@
-// import { setupInitialBoard } from "./utils/setupInitialBoard/setupInitialBoard";
-import CustomChessBoard from "./components/CustomChessBoard/CustomChessBoard";
+import { Suspense, useEffect, useState } from "react";
+import { useTelegram } from "./hooks/useTelegram";
+import { LazyGameScreen } from "./components/CustomChessBoard/GameScreen.lazy";
+import MainMenu from "./components/MainMenu/MainMenu";
+import { Loader } from "./components/Loader/Loader";
+import { GameModeType } from "./utils/typeBoard/types";
+import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
 import styles from "./App.module.css";
 
 export default function App() {
-  // setupInitialBoard();
+  const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
+  const tg = useTelegram();
+
+  useEffect(() => {
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+  }, [tg]);
+
+  // При старте — получаем режим из URL
+  useEffect(() => {
+    const mode = getModeFromUrl();
+    if (mode !== "menu") {
+      setGameMode(mode);
+    }
+  }, []);
+  // Если режим не меню — отрисовываем игру
+  if (gameMode !== "menu") {
+    return (
+      <Suspense fallback={<Loader />}>
+        <LazyGameScreen
+          initialMode={gameMode}
+          onExitToMenu={() => setGameMode("menu")}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className={styles.App}>
-      <CustomChessBoard>
-        <p>Фигуры расставлены!</p>
-      </CustomChessBoard>
+      <MainMenu onStartGame={setGameMode} />
     </div>
   );
 }

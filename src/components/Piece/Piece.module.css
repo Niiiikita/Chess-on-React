@@ -7,11 +7,7 @@
   /* cursor: pointer; */
 }
 
-.piece {
-  transition: transform 0.3s ease-in-out;
-}
-
-.pieceAnimating {
+/* .pieceAnimating {
   animation: lift 0.3s ease-in, drop 0.2s ease-out 0.1s;
 }
 
@@ -31,4 +27,4 @@
   100% {
     transform: translateY(0);
   }
-}
+} */

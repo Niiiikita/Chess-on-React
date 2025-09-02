@@ -36,5 +36,5 @@
     }
   },
   // Указывает, что TypeScript должен проверять только файлы в папке src
-  "include": ["src"]
+  "include": ["src", "types"]
 }

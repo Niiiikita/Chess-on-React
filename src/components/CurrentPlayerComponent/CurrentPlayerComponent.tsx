@@ -1,10 +1,10 @@
 import { memo } from "react";
-import { QueenWhite } from "@/components/ChessPiece/White/QueenWhite";
-import { QueenBlack } from "@/components/ChessPiece/Black/QueenBlack";
 import clsx from "clsx";
 import Button from "../Button/Button";
 import { CapturedPiecesType, GameModeType } from "@/utils/typeBoard/types";
 import CapturedPiecesCount from "../CapturedPiecesCount/CapturedPiecesCount";
+import pieceIconCache from "@/utils/pieceIconCache/pieceIconCache";
+import { useTelegram } from "@/hooks/useTelegram";
 import styles from "./CurrentPlayerComponent.module.css";
 
 /**
@@ -32,14 +32,12 @@ export default memo(function CurrentPlayerComponent({
   className?: string;
   capturedPieces: CapturedPiecesType;
 }) {
+  const tg = useTelegram();
+  const KingIcon = pieceIconCache[`king_${currentPlayer}`];
   return (
     <div className={clsx(styles.advanceContainer, className)}>
       <div className={clsx(styles.advanceContainerCurrentPlayer, className)}>
-        {currentPlayer === "white" ? (
-          <QueenWhite style={{ width: 30, height: 30 }} />
-        ) : (
-          <QueenBlack style={{ width: 30, height: 30 }} />
-        )}
+        {KingIcon && <KingIcon style={{ width: 30, height: 30 }} />}
         <div className={clsx(styles.advanceContainerDescription, className)}>
           <span>Ход: </span>
           <span
@@ -66,6 +64,14 @@ export default memo(function CurrentPlayerComponent({
       >
         Новая игра
       </Button>
+      {tg && (
+        <button
+          onClick={() => tg.close()}
+          className={styles.closeButton}
+        >
+          Закрыть игру
+        </button>
+      )}
     </div>
   );
 });

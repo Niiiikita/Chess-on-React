@@ -3,16 +3,19 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  min-height: 96px;
+  min-height: fit-content;
   border-radius: 8px;
   background-color: bisque;
   user-select: none;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 }
 
 .capturedPiecesBlack,
 .capturedPiecesWhite {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
 }
 

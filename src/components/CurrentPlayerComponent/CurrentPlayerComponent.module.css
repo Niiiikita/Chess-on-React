@@ -8,7 +8,10 @@
   height: 100%;
 
   @media (max-width: 768px) {
+    flex-direction: row;
+    gap: 5px;
     padding: 10px;
+    order: 1;
   }
 }
 
@@ -25,6 +28,7 @@
 
   @media (max-width: 768px) {
     padding: 5px;
+    width: fit-content;
   }
 }
 
@@ -36,4 +40,14 @@
 
 .advanceContainerDescription {
   font-size: clamp(14px, 2vw, 24px);
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.advanceContainerReset,
+.advanceContainerNewGame {
+  @media (max-width: 768px) {
+    padding: 3px;
+  }
 }

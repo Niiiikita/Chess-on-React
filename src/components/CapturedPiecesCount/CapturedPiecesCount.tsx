@@ -1,7 +1,9 @@
 import { memo } from "react";
 import { PieceType } from "@/utils/typeBoard/types";
-import { pieceSymbols } from "../Icons/Icons";
+// import { pieceSymbols } from "../LazyPiece/Icons/Icons";
 import styles from "./CapturedPiecesCount.module.css";
+import pieceIconCache from "@/utils/pieceIconCache/pieceIconCache";
+// import LazyPieceIcon from "../LazyPiece/LazyPieceIcon";
 
 type CapturedPiecesProps = {
   captured: {
@@ -24,28 +26,36 @@ export default memo(function CapturedPiecesCount({
 }: CapturedPiecesProps) {
   return (
     <div className={styles.capturedPieces}>
-      {/* Съеденные чёрные фигуры (отображаются сверху) */}
+      {/* Съеденные чёрные фигуры */}
       <div className={styles.capturedPiecesBlack}>
-        {captured.black.map((piece, i) => (
-          <span
-            key={i}
-            className={styles.capturedPiecesPiece}
-          >
-            {piece && pieceSymbols[piece.color][piece.type]}
-          </span>
-        ))}
+        {captured.black.map((piece, i) => {
+          if (!piece) return null;
+          const Icon = pieceIconCache[`${piece.type}_black`];
+          return (
+            <span
+              key={i}
+              className={styles.capturedPiecesPiece}
+            >
+              {Icon && <Icon />}
+            </span>
+          );
+        })}
       </div>
 
-      {/* Съеденные белые фигуры (отображаются снизу) */}
+      {/* Съеденные белые фигуры */}
       <div className={styles.capturedPiecesWhite}>
-        {captured.white.map((piece, i) => (
-          <span
-            key={i}
-            className={styles.capturedPiecesPiece}
-          >
-            {piece && pieceSymbols[piece.color][piece.type]}
-          </span>
-        ))}
+        {captured.white.map((piece, i) => {
+          if (!piece) return null;
+          const Icon = pieceIconCache[`${piece.type}_white`];
+          return (
+            <span
+              key={i}
+              className={styles.capturedPiecesPiece}
+            >
+              {Icon && <Icon />}
+            </span>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { makeAIMove } from "../makeAIMove/makeAIMove";
 import { ChessGameState } from "../typeBoard/ChessGameState";
-import type { GameModeType } from "../typeBoard/types";
+import type { GameModeType, PieceType } from "../typeBoard/types";
 import { isCheckmate } from "./isCheckmate";
 import { isStalemate } from "./isStalemate";
 
@@ -37,15 +37,7 @@ export function makeMove(
   const newBoard = board.map((row) => [...row]);
   const piece = newBoard[from.row][from.col];
 
-  const targetPiece = newBoard[to.row][to.col];
-  if (targetPiece) {
-    setCapturedPieces((prev) => ({
-      ...prev,
-      [targetPiece.color]: [...prev[targetPiece.color], targetPiece],
-    }));
-  }
-
-  // === 1. Проверяем дошла ли пешка до края доски ===
+  // === 1. Проверка, превращение пешки ===
   if (piece?.type === "pawn" && (to.row === 0 || to.row === 7)) {
     newBoard[to.row][to.col] = piece;
     setBoard(newBoard);
@@ -68,15 +60,31 @@ export function makeMove(
     Math.abs(from.col - to.col) === 1 &&
     newBoard[to.row][to.col] === null;
 
-  // === 3. Выполняем ход ===
+  let capturedPiece: PieceType | null = null;
+
+  if (isEnPassant) {
+    const capturedRow = from.row;
+    const capturedCol = to.col;
+    capturedPiece = newBoard[capturedRow][capturedCol];
+    newBoard[capturedRow][capturedCol] = null;
+  } else {
+    // Обычное взятие
+    capturedPiece = newBoard[to.row][to.col];
+  }
+
+  // === 3. Добавляем в capturedPieces, если была взята фигура ===
+  if (capturedPiece) {
+    setCapturedPieces((prev) => ({
+      ...prev,
+      [capturedPiece!.color]: [...prev[capturedPiece!.color], capturedPiece!],
+    }));
+  }
+
+  // === 4. Выполняем ход ===
   newBoard[to.row][to.col] = piece;
   newBoard[from.row][from.col] = null;
 
-  if (isEnPassant) {
-    newBoard[from.row][to.col] = null;
-  }
-
-  // === 4. Рокировка ===
+  // === 5. Рокировка ===
   if (piece?.type === "king" && Math.abs(from.col - to.col) === 2) {
     const rookFromCol = to.col === 6 ? 7 : 0;
     const rookToCol = to.col === 6 ? 5 : 3;
@@ -84,7 +92,6 @@ export function makeMove(
     newBoard[to.row][rookFromCol] = null;
   }
 
-  // === 5. Обновление состояния ===
   setBoard(newBoard);
   setLastMove({
     from: [from.row, from.col],
@@ -95,7 +102,7 @@ export function makeMove(
   setPossibleMove([]);
   setSelectedFrom(null);
 
-  // === 6. Проверяем на мат/пат ===
+  // === 6. Проверка на мат/пат ===
   const opponentColor = piece?.color === "white" ? "black" : "white";
   if (isCheckmate(newBoard, opponentColor)) {
     setGameOver("checkmate");
@@ -103,7 +110,7 @@ export function makeMove(
     setGameOver("stalemate");
   }
 
-  // === 7. Обновляем состояние фигур ===
+  // === 7. Обновление состояния фигур ===
   if (piece?.type === "king") {
     setHasKingMoved((prev) => ({ ...prev, [piece.color]: true }));
   }
@@ -117,12 +124,10 @@ export function makeMove(
     }));
   }
 
-  // console.log("Ход сделан", piece, "на", to);
-
   // === 8. Меняем ход ===
   setCurrentPlayer(currentPlayer === "white" ? "black" : "white");
 
-  // === 9. БОТ: если режим "vs-ai" и ходил белый — чёрный отвечает ===
+  // === 9. Бот, если режим "vs-ai" и ходил белый, он отвечает ===
   if (gameState === "vs-ai" && piece?.color === "white") {
     setTimeout(() => {
       makeAIMove({

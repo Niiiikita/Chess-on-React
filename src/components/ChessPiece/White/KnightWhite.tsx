@@ -1,4 +1,4 @@
-export function KnightWhite(props: React.SVGProps<SVGSVGElement>) {
+export default function KnightWhite(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

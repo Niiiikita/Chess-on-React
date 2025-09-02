@@ -13,8 +13,6 @@ export function handlePieceEnter(
   const square = coordsToSquare(rowIdx, colIdx);
   const draggedColor = e.dataTransfer.getData("color");
 
-  //   console.log(draggedColor === currentPlayer);
-
   if (draggedColor !== currentPlayer) return;
 
   if (draggedColor === currentPlayer && possibleMove.includes(square)) {

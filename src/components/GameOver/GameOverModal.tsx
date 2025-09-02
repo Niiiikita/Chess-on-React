@@ -8,6 +8,9 @@ type GameOverModalProps = {
 } & ReturnType<typeof useChessGame>;
 
 export default function GameOverModal({
+  setGameState,
+  gameOver,
+  // Распаковываем все сеттеры, которые нужны resetGame
   setBoard,
   setLastMove,
   setPromotion,
@@ -16,8 +19,6 @@ export default function GameOverModal({
   setSelectedFrom,
   setCurrentPlayer,
   setHint,
-  gameOver,
-  setGameState,
   setHasKingMoved,
   setHasRookMoved,
   setCapturedPieces,
@@ -28,7 +29,7 @@ export default function GameOverModal({
         <h2>{gameOver === "checkmate" ? "Мат!" : "Пат!"}</h2>
         <button
           onClick={() =>
-            resetGame(
+            resetGame({
               setBoard,
               setLastMove,
               setPromotion,
@@ -39,8 +40,8 @@ export default function GameOverModal({
               setHint,
               setHasKingMoved,
               setHasRookMoved,
-              setCapturedPieces
-            )
+              setCapturedPieces,
+            })
           }
         >
           Новая игра

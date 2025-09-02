@@ -1,8 +1,8 @@
-import { useCallback } from "react";
+import { Suspense } from "react";
 import { useChessGame } from "@/hooks/useChessGame";
 import { usePieceDrag } from "@/hooks/usePieceDrag";
-import PopupChoosingFigure from "../PopupChoosingFigure/PopupChoosingFigure";
-import GameOverModal from "../GameOver/GameOverModal";
+import { LazyPopupChoosingFigure } from "../PopupChoosingFigure/PopupChoosingFigure.lazy";
+import { LazyGameOverModal } from "../GameOver/GameOverModal.lazy";
 import Square from "../Square/Square";
 import Hint from "../Hint/Hint";
 import CurrentPlayerComponent from "../CurrentPlayerComponent/CurrentPlayerComponent";
@@ -42,6 +42,7 @@ export default function Board({
     setHighlightedSquare,
   } = game;
 
+  // Кастомный хук для перетаскивания фигуры
   const { handleDragStart } = usePieceDrag({
     board: game.board,
     lastMove: game.lastMove,
@@ -50,34 +51,6 @@ export default function Board({
     currentPlayer: game.currentPlayer,
     setPossibleMove: game.setPossibleMove,
   });
-
-  const stableResetGame = useCallback(() => {
-    resetGame(
-      setBoard,
-      setLastMove,
-      setPromotion,
-      setGameOver,
-      setPossibleMove,
-      setSelectedFrom,
-      setCurrentPlayer,
-      setHint,
-      setHasKingMoved,
-      setHasRookMoved,
-      setCapturedPieces
-    );
-  }, [
-    setBoard,
-    setLastMove,
-    setPromotion,
-    setGameOver,
-    setPossibleMove,
-    setSelectedFrom,
-    setCurrentPlayer,
-    setHint,
-    setHasKingMoved,
-    setHasRookMoved,
-    setCapturedPieces,
-  ]);
 
   return (
     <div className={styles.boardContainer}>
@@ -133,10 +106,12 @@ export default function Board({
 
       {/* Модальное окно — ОДНО, поверх доски */}
       {promotion && (
-        <PopupChoosingFigure
-          gameState={gameState}
-          {...game}
-        />
+        <Suspense fallback={null}>
+          <LazyPopupChoosingFigure
+            {...game}
+            gameState={gameState}
+          />
+        </Suspense>
       )}
 
       {/* Индикатор текущего игрока */}
@@ -144,14 +119,30 @@ export default function Board({
         currentPlayer={currentPlayer}
         setGameState={setGameState}
         capturedPieces={capturedPieces}
-        resetGame={stableResetGame}
+        resetGame={() =>
+          resetGame({
+            setBoard,
+            setLastMove,
+            setPromotion,
+            setGameOver,
+            setPossibleMove,
+            setSelectedFrom,
+            setCurrentPlayer,
+            setHint,
+            setHasKingMoved,
+            setHasRookMoved,
+            setCapturedPieces,
+          })
+        }
       />
 
       {gameOver && (
-        <GameOverModal
-          setGameState={setGameState}
-          {...game}
-        />
+        <Suspense fallback={null}>
+          <LazyGameOverModal
+            {...game}
+            setGameState={setGameState}
+          />
+        </Suspense>
       )}
     </div>
   );

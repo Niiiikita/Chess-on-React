@@ -1,32 +1,111 @@
 .modalOverlay {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  width: fit-content;
 }
 
 .modalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   padding: 20px;
-  width: 300px;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
+  border: 2px solid #333;
   border-radius: 8px;
 }
 
+.modalContent h1 {
+  margin: 0;
+  font-size: 64px;
+}
+
+.setting {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .settingItem {
-  margin: 12px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 15px;
 }
 
-.settingItem label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.select {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+.flipswitch {
+  position: relative;
+  /* width: 86px; */
+  width: 66px;
+}
+.flipswitch input[type="checkbox"] {
+  display: none;
+}
+.flipswitchLabel {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #999999;
+  border-radius: 11px;
+}
+.flipswitchInner {
+  width: 200%;
+  margin-left: -100%;
+  transition: margin 0.3s ease-in 0s;
+}
+.flipswitchInner:before,
+.flipswitchInner:after {
+  float: left;
+  width: 50%;
+  height: 24px;
+  padding: 0;
+  line-height: 24px;
+  font-size: 16px;
+  color: white;
+  font-family: Trebuchet, Arial, sans-serif;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+.flipswitchInner:before {
+  content: "ON";
+  padding-left: 12px;
+  background-color: #333;
+  color: chocolate;
+  text-align: left;
+}
+.flipswitchInner:after {
+  content: "OFF";
+  padding-right: 5px;
+  background-color: #ebebeb;
+  color: #888888;
+  text-align: right;
+}
+.flipswitchSwitch {
+  width: 31px;
+  margin: -3.5px;
+  background: #ffffff;
+  border: 1px solid #999999;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 40px;
+  transition: all 0.3s ease-in 0s;
+}
+.flipswitchCb:checked + .flipswitchLabel .flipswitchInner {
+  margin-left: 0;
+}
+.flipswitchCb:checked + .flipswitchLabel .flipswitchSwitch {
+  right: 0;
+}
+
+.backButton {
+  width: 100%;
 }

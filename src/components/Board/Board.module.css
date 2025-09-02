@@ -4,6 +4,12 @@
   grid-template-columns: 1fr minmax(150px, 0.5fr);
   justify-content: center;
   height: 100%;
+  border: 2px solid #333;
+  border-radius: 8px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .board {
@@ -11,6 +17,10 @@
   display: flex;
   justify-content: center;
   height: 100%;
+
+  @media (max-width: 768px) {
+    order: 2;
+  }
 }
 
 .boardGame {

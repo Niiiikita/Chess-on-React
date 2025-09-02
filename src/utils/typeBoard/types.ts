@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+// import type { ReactElement } from "react";
 
 export type GameModeType = "menu" | "vs-ai" | "local" | "online";
 
@@ -22,21 +22,16 @@ export type PieceType = {
 export type Board = PieceType[][];
 
 export type PieceSymbols = {
-  white: {
-    king: ReactElement;
-    queen: ReactElement;
-    rook: ReactElement;
-    bishop: ReactElement;
-    knight: ReactElement;
-    pawn: ReactElement;
-  };
-  black: {
-    king: ReactElement;
-    queen: ReactElement;
-    rook: ReactElement;
-    bishop: ReactElement;
-    knight: ReactElement;
-    pawn: ReactElement;
+  [color in "white" | "black"]: {
+    [type in
+      | "king"
+      | "queen"
+      | "rook"
+      | "bishop"
+      | "knight"
+      | "pawn"]: () => Promise<{
+      default: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    }>;
   };
 };
 

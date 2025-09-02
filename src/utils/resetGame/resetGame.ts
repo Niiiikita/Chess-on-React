@@ -6,41 +6,42 @@ import type {
   PieceType,
   PromotionType,
   SelectedFromType,
+  CapturedPiecesType,
 } from "../typeBoard/types";
 
-/**
- * Восстанавливает начальную конфигурацию игрового состояния.
- * @param e - Отключение действий браузера по умолчанию.
- * @param setBoard - Функция для сброса шахматной доски в исходное состояние.
- * @param setLastMove - Функция для очистки информации о последнем ходе.
- * @param setPromotion - Функция для сброса состояния превращения.
- * @param setGameOver - Функция для сброса состояния окончания игры.
- * @param setPossibleMove - Функция для очистки списка возможных ходов.
- * @param setSelectedFrom - Функция для сброса позиции выбранной фигуры.
- * @param setCurrentPlayer - Функция для сброса состояния текущего игрока.
- * @param setHint - Функция для сброса состояния подсказки.
- */
-export function resetGame(
-  setBoard?: React.Dispatch<React.SetStateAction<PieceType[][]>>,
-  setLastMove?: React.Dispatch<React.SetStateAction<LastMoveType>>,
-  setPromotion?: React.Dispatch<React.SetStateAction<PromotionType>>,
+export type ResetGameArgs = {
+  setBoard?: React.Dispatch<React.SetStateAction<PieceType[][]>>;
+  setLastMove?: React.Dispatch<React.SetStateAction<LastMoveType>>;
+  setPromotion?: React.Dispatch<React.SetStateAction<PromotionType>>;
   setGameOver?: React.Dispatch<
-    React.SetStateAction<null | "checkmate" | "stalemate">
-  >,
-  setPossibleMove?: React.Dispatch<React.SetStateAction<string[]>>,
-  setSelectedFrom?: React.Dispatch<React.SetStateAction<SelectedFromType>>,
-  setCurrentPlayer?: React.Dispatch<React.SetStateAction<"white" | "black">>,
-  setHint?: React.Dispatch<React.SetStateAction<string | null>>,
-  setHasKingMoved?: React.Dispatch<React.SetStateAction<HasKingMovedType>>,
-  setHasRookMoved?: React.Dispatch<React.SetStateAction<HasRookMovedType>>,
-  setCapturedPieces?: React.Dispatch<
-    React.SetStateAction<{
-      white: PieceType[];
-      black: PieceType[];
-    }>
-  >
-) {
-  // Сброс всех состояний
+    React.SetStateAction<"checkmate" | "stalemate" | null>
+  >;
+  setPossibleMove?: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedFrom?: React.Dispatch<React.SetStateAction<SelectedFromType>>;
+  setCurrentPlayer?: React.Dispatch<React.SetStateAction<"white" | "black">>;
+  setHint?: React.Dispatch<React.SetStateAction<string | null>>;
+  setHasKingMoved?: React.Dispatch<React.SetStateAction<HasKingMovedType>>;
+  setHasRookMoved?: React.Dispatch<React.SetStateAction<HasRookMovedType>>;
+  setCapturedPieces?: React.Dispatch<React.SetStateAction<CapturedPiecesType>>;
+};
+
+/**
+ * Сбрасывает игровое состояние к начальному.
+ * Все аргументы — опциональны, чтобы можно было использовать функцию гибко.
+ */
+export function resetGame({
+  setBoard,
+  setLastMove,
+  setPromotion,
+  setGameOver,
+  setPossibleMove,
+  setSelectedFrom,
+  setCurrentPlayer,
+  setHint,
+  setHasKingMoved,
+  setHasRookMoved,
+  setCapturedPieces,
+}: ResetGameArgs) {
   if (setBoard) setBoard(setupInitialBoard());
   if (setLastMove) setLastMove(null);
   if (setPromotion) setPromotion(null);

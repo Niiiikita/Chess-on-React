@@ -19,50 +19,90 @@ export default function SettingsModal({ onBack }: { onBack: () => void }) {
         className={styles.modalContent}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2>Настройки</h2>
-        <div className={styles.settingItem}>
-          <label htmlFor="theme">Тема:</label>
-          <select
-            id="theme"
-            value={settings.theme}
-            onChange={(e) => handleChange("theme", e.target.value)}
+        <h1>Настройки</h1>
+        <div className={styles.setting}>
+          <div className={styles.settingItem}>
+            <label htmlFor="theme">Тема:</label>
+            <select
+              id="theme"
+              className={styles.select}
+              value={settings.theme}
+              onChange={(e) => handleChange("theme", e.target.value)}
+            >
+              <option value="dark">Тёмная</option>
+              <option value="light">Светлая</option>
+            </select>
+          </div>
+
+          <div className={styles.settingItem}>
+            <span>Подсвечивать возможные ходы</span>
+            <div className={styles.flipswitch}>
+              <input
+                className={styles.flipswitchCb}
+                id="highlightMoves"
+                type="checkbox"
+                checked={settings.highlightMoves}
+                onChange={(e) =>
+                  handleChange("highlightMoves", e.target.checked)
+                }
+              />
+              <label
+                htmlFor="highlightMoves"
+                className={styles.flipswitchLabel}
+              >
+                <div className={styles.flipswitchInner}></div>
+                <div className={styles.flipswitchSwitch}></div>
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.settingItem}>
+            <span>Анимации</span>
+            <div className={styles.flipswitch}>
+              <input
+                className={styles.flipswitchCb}
+                id="animations"
+                type="checkbox"
+                checked={settings.animations}
+                onChange={(e) => handleChange("animations", e.target.checked)}
+              />
+              <label
+                htmlFor="animations"
+                className={styles.flipswitchLabel}
+              >
+                <div className={styles.flipswitchInner}></div>
+                <div className={styles.flipswitchSwitch}></div>
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.settingItem}>
+            <span>Звук</span>
+            <div className={styles.flipswitch}>
+              <input
+                className={styles.flipswitchCb}
+                id="sound"
+                type="checkbox"
+                checked={settings.sound}
+                onChange={(e) => handleChange("sound", e.target.checked)}
+              />
+              <label
+                htmlFor="sound"
+                className={styles.flipswitchLabel}
+              >
+                <div className={styles.flipswitchInner}></div>
+                <div className={styles.flipswitchSwitch}></div>
+              </label>
+            </div>
+          </div>
+
+          <Button
+            className={styles.backButton}
+            onClick={onBack}
           >
-            <option value="dark">Тёмная</option>
-            <option value="light">Светлая</option>
-          </select>
+            Назад
+          </Button>
         </div>
-
-        <div className={styles.settingItem}>
-          <input
-            id="highlightMoves"
-            type="checkbox"
-            checked={settings.highlightMoves}
-            onChange={(e) => handleChange("highlightMoves", e.target.checked)}
-          />
-          <label htmlFor="highlightMoves">Подсвечивать возможные ходы</label>
-        </div>
-
-        <div className={styles.settingItem}>
-          <input
-            id="animations"
-            type="checkbox"
-            checked={settings.animations}
-            onChange={(e) => handleChange("animations", e.target.checked)}
-          />
-          <label htmlFor="animations">Анимации</label>
-        </div>
-
-        <div className={styles.settingItem}>
-          <input
-            id="sound"
-            type="checkbox"
-            checked={settings.sound}
-            onChange={(e) => handleChange("sound", e.target.checked)}
-          />
-          <label htmlFor="sound">Звук</label>
-        </div>
-
-        <Button onClick={onBack}>Назад</Button>
       </div>
     </div>
   );
