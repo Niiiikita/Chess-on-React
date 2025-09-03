@@ -5,12 +5,12 @@ import MainMenu from "./components/MainMenu/MainMenu";
 import { Loader } from "./components/Loader/Loader";
 import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
-import { useTelegramMock } from "./hooks/useTelegramMock";
+// import { useTelegramMock } from "./hooks/useTelegramMock";
 import styles from "./App.module.css";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
-  useTelegramMock(); // Мок только в dev
+  // useTelegramMock(); // Мок только в dev
   const tg = useTelegram();
 
   useEffect(() => {
