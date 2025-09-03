@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@telegram-apps/bridge": "^2.11.0",
     "@telegram-apps/sdk": "^3.11.5",
     "clsx": "^2.1.1",
     "react": "^19.1.1",

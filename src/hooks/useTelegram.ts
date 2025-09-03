@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react";
 import { init } from "@telegram-apps/sdk";
+import { isTMA } from "@telegram-apps/bridge";
 
 export function useTelegram() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tg, setTg] = useState<any>(null);
 
   useEffect(() => {
-    // Инициализируем SDK
+    // Проверяем, запущено ли приложение в Telegram Mini App
+    if (!isTMA()) {
+      console.warn("Приложение запущено не в Telegram Mini App");
+      return;
+    }
+
+    // Инициализируем SDK только в Telegram
     init();
 
-    // Проверяем каждые 100мс, появился ли Telegram.WebApp
     const timer = setInterval(() => {
       if (window.Telegram?.WebApp) {
         clearInterval(timer);
@@ -17,7 +23,6 @@ export function useTelegram() {
       }
     }, 100);
 
-    // Таймаут на 5 секунд
     const timeout = setTimeout(() => {
       clearInterval(timer);
     }, 5000);
