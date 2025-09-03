@@ -1,24 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { init } from "@telegram-apps/sdk";
 
 export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
-  try {
-    init();
-  } catch (e) {
-    console.warn("SDK не может быть инициализирован", e);
-    return;
-  }
-
-  const timer = setInterval(() => {
-    if (window.Telegram) {
-      clearInterval(timer);
-      console.log("Telegram WebApp наконе-то запущен");
-      setTg(window.Telegram);
+  useEffect(() => {
+    // Инициализируем SDK
+    try {
+      init();
+    } catch (e) {
+      console.warn("SDK не может быть инициализирован", e);
+      return;
     }
-  }, 100);
+
+    // Ждём появления WebApp
+    const timer = setInterval(() => {
+      if (window.Telegram) {
+        clearInterval(timer);
+        setTg(window.Telegram);
+      }
+    }, 100);
+  }, []);
 
   return tg;
 }
