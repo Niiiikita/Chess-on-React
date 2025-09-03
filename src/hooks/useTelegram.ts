@@ -1,35 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
-import { init, isTMA } from "@telegram-apps/sdk";
+import { useState } from "react";
+import { init } from "@telegram-apps/sdk";
 
 export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
-  async function isTMAFunc() {
-    if (await isTMA()) {
-      console.log("Точно в Telegram Mini App");
-    }
+  try {
+    init();
+  } catch (e) {
+    console.warn("SDK не может быть инициализирован", e);
+    return;
   }
 
-  useEffect(() => {
-    isTMAFunc();
-
-    try {
-      init();
-    } catch (e) {
-      console.warn("SDK не может быть инициализирован", e);
-      return;
+  const timer = setInterval(() => {
+    if (window.Telegram?.WebApp) {
+      clearInterval(timer);
+      console.log("Telegram WebApp наконе-то запущен");
+      setTg(window.Telegram.WebApp);
     }
-
-    const timer = setInterval(() => {
-      if (window.Telegram?.WebApp) {
-        clearInterval(timer);
-        setTg(window.Telegram.WebApp);
-      }
-    }, 100);
-
-    return () => clearInterval(timer);
-  }, []);
+  }, 100);
 
   return tg;
 }

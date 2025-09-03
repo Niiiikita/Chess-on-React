@@ -11,18 +11,12 @@ import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
   const tg = useTelegram();
-  setTimeout(() => {
-    console.log("Точно в Telegram Mini App");
-    console.log("window.Telegram.WebApp:", window.Telegram?.WebApp);
-  }, 7000);
 
-  useEffect(() => {
-    if (tg) {
-      tg.ready(); // Готов к работе
-      tg.expand(); // На весь экран
-      console.log("Telegram WebApp:", tg.initDataUnsafe);
-    }
-  }, [tg]);
+  if (tg) {
+    tg.ready(); // Готов к работе
+    tg.expand(); // На весь экран
+    console.log("Telegram WebApp:", tg.initDataUnsafe);
+  }
 
   // При старте — получаем режим из URL
   useEffect(() => {
