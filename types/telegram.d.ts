@@ -4,6 +4,7 @@ declare global {
   interface Window {
     Telegram?: {
       WebApp?: unknown;
+      WebView?: unknown;
     };
   }
 }

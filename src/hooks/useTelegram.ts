@@ -16,9 +16,9 @@ export function useTelegram() {
 
     // Ждём появления WebApp
     const timer = setInterval(() => {
-      if (window.Telegram) {
+      if (window.Telegram?.WebView) {
         clearInterval(timer);
-        setTg(window.Telegram);
+        setTg(window.Telegram?.WebView);
       }
     }, 100);
   }, []);
