@@ -108,6 +108,7 @@ export default defineConfig(({ mode }) => {
         "react",
         "react-dom",
         "react-router-dom",
+        "eruda",
       ],
     },
 
