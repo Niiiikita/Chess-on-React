@@ -10,6 +10,7 @@ import styles from "./App.module.css";
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
   const tg = useTelegram();
+  console.log("Приложение запущено");
 
   useEffect(() => {
     if (tg) {
