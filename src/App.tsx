@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useState } from "react";
-import { useTelegram } from "./hooks/useTelegram";
 import { LazyGameScreen } from "./components/CustomChessBoard/GameScreen.lazy";
 import MainMenu from "./components/MainMenu/MainMenu";
 import { Loader } from "./components/Loader/Loader";
@@ -7,6 +6,7 @@ import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
 import styles from "./App.module.css";
 import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer";
+import { useTelegram } from "./hooks/useTelegram";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
