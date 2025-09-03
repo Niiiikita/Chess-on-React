@@ -5,7 +5,6 @@ import MainMenu from "./components/MainMenu/MainMenu";
 import { Loader } from "./components/Loader/Loader";
 import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
-// import { useTelegramMock } from "./hooks/useTelegramMock";
 import styles from "./App.module.css";
 import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer";
 

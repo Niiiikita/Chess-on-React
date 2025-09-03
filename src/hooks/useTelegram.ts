@@ -1,18 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { init } from "@telegram-apps/sdk";
+import { init, isTMA } from "@telegram-apps/sdk";
 
 export function useTelegram() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tg, setTg] = useState<any>(null);
 
   useEffect(() => {
-    // Проверяем, в Telegram ли мы
-    if (typeof window === "undefined" || !window.Telegram) {
+    if (!isTMA()) {
       console.warn("Приложение запущено не в Telegram Mini App");
       return;
     }
 
-    // Инициализируем SDK
     try {
       init();
     } catch (e) {
@@ -20,7 +18,6 @@ export function useTelegram() {
       return;
     }
 
-    // Ждём появления WebApp
     const timer = setInterval(() => {
       if (window.Telegram?.WebApp) {
         clearInterval(timer);
