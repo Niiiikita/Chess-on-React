@@ -4,7 +4,11 @@ import "./index.css";
 import App from "./App";
 // import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer";
 
-if (import.meta.env.DEV) {
+// Проверяем URL-параметр debug
+const urlParams = new URLSearchParams(window.location.search);
+const shouldEnableDebug = urlParams.get("debug") === "true";
+
+if (shouldEnableDebug) {
   import("eruda").then((eruda) => {
     eruda.default.init();
     console.log("Eruda initialized");

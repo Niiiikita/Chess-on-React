@@ -5,8 +5,8 @@ import MainMenu from "./components/MainMenu/MainMenu";
 import { Loader } from "./components/Loader/Loader";
 import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
-import styles from "./App.module.css";
 // import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer";
+import styles from "./App.module.css";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
@@ -30,12 +30,16 @@ export default function App() {
   // Если режим не меню — отрисовываем игру
   if (gameMode !== "menu") {
     return (
-      <Suspense fallback={<Loader />}>
-        <LazyGameScreen
-          initialMode={gameMode}
-          onExitToMenu={() => setGameMode("menu")}
-        />
-      </Suspense>
+      <>
+        {/* <ErudaInitializer /> */}
+
+        <Suspense fallback={<Loader />}>
+          <LazyGameScreen
+            initialMode={gameMode}
+            onExitToMenu={() => setGameMode("menu")}
+          />
+        </Suspense>
+      </>
     );
   }
 
