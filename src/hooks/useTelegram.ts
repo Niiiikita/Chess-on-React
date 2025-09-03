@@ -17,15 +17,15 @@ export function useTelegram() {
     try {
       init();
     } catch (e) {
-      console.warn("SDK не может быть инициализирован", e);
+      console.warn("SDK не может быть инициализирован \n", e);
       return;
     }
 
     // Ждём появления WebApp
     const timer = setInterval(() => {
-      if (window.Telegram?.WebView) {
+      if (window.Telegram?.WebApp) {
         clearInterval(timer);
-        setTg(window.Telegram?.WebView);
+        setTg(window.Telegram?.WebApp);
       }
     }, 100);
   }, []);
