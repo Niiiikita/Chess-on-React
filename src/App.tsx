@@ -7,6 +7,7 @@ import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
 // import { useTelegramMock } from "./hooks/useTelegramMock";
 import styles from "./App.module.css";
+import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
@@ -31,6 +32,8 @@ export default function App() {
   if (gameMode !== "menu") {
     return (
       <Suspense fallback={<Loader />}>
+        <ErudaInitializer />
+
         <LazyGameScreen
           initialMode={gameMode}
           onExitToMenu={() => setGameMode("menu")}
