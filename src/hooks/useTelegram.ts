@@ -7,9 +7,11 @@ export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
   useEffect(() => {
-    if (isTMA("simple")) {
-      console.log("It's Telegram Mini Apps");
-    }
+    (async () => {
+      if (await isTMA("complete")) {
+        console.log("It's Telegram Mini Apps");
+      }
+    })();
 
     // Инициализируем SDK
     try {
