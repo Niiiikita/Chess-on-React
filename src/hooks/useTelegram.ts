@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { init, isTMA } from "@telegram-apps/sdk";
+import { init } from "@telegram-apps/sdk";
 
 export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
   useEffect(() => {
-    if (!isTMA()) {
-      console.warn("Приложение запущено не в Telegram Mini App");
-      return;
-    }
+    // if (!isTMA()) {
+    //   console.warn("Приложение запущено не в Telegram Mini App");
+    //   return;
+    // }
 
     try {
       init();
