@@ -6,18 +6,21 @@ export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
   useEffect(() => {
+    // Инициализируем SDK
+    init();
+
+    // Проверяем каждые 100мс, появился ли Telegram.WebApp
     const timer = setInterval(() => {
       if (window.Telegram?.WebApp) {
         clearInterval(timer);
-        init();
         setTg(window.Telegram.WebApp);
       }
     }, 100);
 
-    // Таймаут на 3 секунды — если не загрузилось
+    // Таймаут на 5 секунд
     const timeout = setTimeout(() => {
       clearInterval(timer);
-    }, 3000);
+    }, 5000);
 
     return () => {
       clearInterval(timer);
