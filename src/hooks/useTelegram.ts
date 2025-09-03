@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
-import { init } from "@telegram-apps/sdk";
+import { init, isTMA } from "@telegram-apps/sdk";
 
 export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
+  async function isTMAFunc() {
+    if (await isTMA()) {
+      console.log("Точно в Telegram Mini App");
+    }
+  }
+
   useEffect(() => {
-    // if (!isTMA()) {
-    //   console.warn("Приложение запущено не в Telegram Mini App");
-    //   return;
-    // }
+    isTMAFunc();
 
     try {
       init();

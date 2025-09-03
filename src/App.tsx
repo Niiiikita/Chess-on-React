@@ -14,7 +14,7 @@ export default function App() {
   setTimeout(() => {
     console.log("Точно в Telegram Mini App");
     console.log("window.Telegram.WebApp:", window.Telegram?.WebApp);
-  }, 2000);
+  }, 7000);
 
   useEffect(() => {
     if (tg) {
