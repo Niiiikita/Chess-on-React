@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { init } from "@telegram-apps/sdk";
+import { isTMA } from "@telegram-apps/bridge";
 
 export function useTelegram() {
   const [tg, setTg] = useState<any>(null);
 
   useEffect(() => {
+    if (isTMA("simple")) {
+      console.log("It's Telegram Mini Apps");
+    }
+
     // Инициализируем SDK
     try {
       init();
