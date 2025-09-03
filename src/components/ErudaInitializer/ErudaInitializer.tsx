@@ -14,6 +14,10 @@ export function ErudaInitializer() {
           console.log("Eruda загружена", eruda); // 🔍 Лог
           if (!window.eruda) {
             eruda.default.init();
+            if (typeof window === "undefined" || !window.Telegram) {
+              console.warn("Приложение запущено не в Telegram Mini App");
+              return;
+            }
           }
         })
         .catch((err) => {

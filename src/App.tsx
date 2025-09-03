@@ -11,13 +11,13 @@ import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
-  // useTelegramMock(); // Мок только в dev
   const tg = useTelegram();
 
   useEffect(() => {
     if (tg) {
-      tg.ready();
-      tg.expand();
+      tg.ready(); // Готов к работе
+      tg.expand(); // На весь экран
+      console.log("Telegram WebApp:", tg.initDataUnsafe);
     }
   }, [tg]);
 
@@ -31,14 +31,16 @@ export default function App() {
   // Если режим не меню — отрисовываем игру
   if (gameMode !== "menu") {
     return (
-      <Suspense fallback={<Loader />}>
+      <>
         <ErudaInitializer />
 
-        <LazyGameScreen
-          initialMode={gameMode}
-          onExitToMenu={() => setGameMode("menu")}
-        />
-      </Suspense>
+        <Suspense fallback={<Loader />}>
+          <LazyGameScreen
+            initialMode={gameMode}
+            onExitToMenu={() => setGameMode("menu")}
+          />
+        </Suspense>
+      </>
     );
   }
 
