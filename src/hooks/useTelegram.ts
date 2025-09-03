@@ -13,10 +13,10 @@ export function useTelegram() {
   }
 
   const timer = setInterval(() => {
-    if (window.Telegram?.WebApp) {
+    if (window.Telegram) {
       clearInterval(timer);
       console.log("Telegram WebApp наконе-то запущен");
-      setTg(window.Telegram.WebApp);
+      setTg(window.Telegram);
     }
   }, 100);
 
