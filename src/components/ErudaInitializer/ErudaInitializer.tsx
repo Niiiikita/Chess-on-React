@@ -5,13 +5,20 @@ export function ErudaInitializer() {
     const params = new URLSearchParams(window.location.search);
     const shouldEnableDebug = params.get("debug") === "true";
 
+    console.log("ErudaInitializer: debug mode =", shouldEnableDebug); // 🔍 Лог
+
     if (shouldEnableDebug) {
-      // Динамический импорт — Vite включит eruda в отдельный чанк
-      import("eruda").then((eruda) => {
-        if (!window.eruda) {
-          eruda.default.init();
-        }
-      });
+      console.log("Попытка загрузить Eruda..."); // 🔍 Лог
+      import("eruda")
+        .then((eruda) => {
+          console.log("Eruda загружена", eruda); // 🔍 Лог
+          if (!window.eruda) {
+            eruda.default.init();
+          }
+        })
+        .catch((err) => {
+          console.error("Ошибка загрузки Eruda", err); // 🔍 Лог
+        });
     }
   }, []);
 
