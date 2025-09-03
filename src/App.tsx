@@ -11,6 +11,10 @@ import { ErudaInitializer } from "./components/ErudaInitializer/ErudaInitializer
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
   const tg = useTelegram();
+  setTimeout(() => {
+    console.log("Точно в Telegram Mini App");
+    console.log("window.Telegram.WebApp:", window.Telegram?.WebApp);
+  }, 2000);
 
   useEffect(() => {
     if (tg) {
