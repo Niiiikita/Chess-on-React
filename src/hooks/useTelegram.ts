@@ -10,7 +10,6 @@ export function useTelegram() {
     (async () => {
       if (await isTMA("complete")) {
         console.log("It's Telegram Mini Apps");
-        return;
       }
     })();
 

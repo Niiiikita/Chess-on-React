@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from "react";
-import { useTelegram } from "./hooks/useTelegram";
+// import { useTelegram } from "./hooks/useTelegram";
 import { LazyGameScreen } from "./components/CustomChessBoard/GameScreen.lazy";
 import MainMenu from "./components/MainMenu/MainMenu";
 import { Loader } from "./components/Loader/Loader";
@@ -10,15 +10,15 @@ import styles from "./App.module.css";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
-  const tg = useTelegram();
+  // const tg = useTelegram();
 
-  useEffect(() => {
-    if (tg) {
-      tg.ready(); // Готов к работе
-      tg.expand(); // На весь экран
-      console.log("Telegram WebApp:", tg.initDataUnsafe);
-    }
-  }, [tg]);
+  // useEffect(() => {
+  //   if (tg) {
+  //     tg.ready(); // Готов к работе
+  //     tg.expand(); // На весь экран
+  //     console.log("Telegram WebApp:", tg.initDataUnsafe);
+  //   }
+  // }, [tg]);
 
   // При старте — получаем режим из URL
   useEffect(() => {
