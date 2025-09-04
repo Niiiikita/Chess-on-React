@@ -6,7 +6,7 @@ import { isTMA } from "@telegram-apps/bridge";
 import "./index.css";
 
 const initializeTelegramSDK = async () => {
-  if (await !isTMA()) {
+  if (await !isTMA("complete")) {
     console.warn("Приложение запущено не в Telegram Mini App");
     return;
   }
