@@ -1,17 +1,8 @@
-// import { BishopBlack } from "../ChessPiece/Black/BishopBlack";
-// import { KnightBlack } from "../ChessPiece/Black/KnightBlack";
-// import { QueenBlack } from "../ChessPiece/Black/QueenBlack";
-// import { RookBlack } from "../ChessPiece/Black/RookBlack";
-// import { BishopWhite } from "../ChessPiece/White/BishopWhite";
-// import { KnightWhite } from "../ChessPiece/White/KnightWhite";
-// import { QueenWhite } from "../ChessPiece/White/QueenWhite";
-// import { RookWhite } from "../ChessPiece/White/RookWhite";
 import type { GameModeType, PieceType } from "../../utils/typeBoard/types";
 import Button from "../Button/Button";
 import { useChessGame } from "@/hooks/useChessGame";
 import { makeAIMove } from "@/utils/makeAIMove/makeAIMove";
 import styles from "./PopupChoosingFigure.module.css";
-// import LazyPieceIcon from "../LazyPiece/LazyPieceIcon";
 import pieceIconCache from "@/utils/pieceIconCache/pieceIconCache";
 
 const pieceToRussian: Record<
@@ -25,17 +16,6 @@ const pieceToRussian: Record<
   pawn: "Пешка",
   king: "Король",
 };
-
-// const pieceIconMap: Record<string, React.ReactNode> = {
-//   queen_white: <QueenWhite className={styles.popupPieceIcon} />,
-//   queen_black: <QueenBlack className={styles.popupPieceIcon} />,
-//   rook_white: <RookWhite className={styles.popupPieceIcon} />,
-//   rook_black: <RookBlack className={styles.popupPieceIcon} />,
-//   bishop_white: <BishopWhite className={styles.popupPieceIcon} />,
-//   bishop_black: <BishopBlack className={styles.popupPieceIcon} />,
-//   knight_white: <KnightWhite className={styles.popupPieceIcon} />,
-//   knight_black: <KnightBlack className={styles.popupPieceIcon} />,
-// };
 
 export default function PopupChoosingFigure(
   context: ReturnType<typeof useChessGame> & { gameState: GameModeType }

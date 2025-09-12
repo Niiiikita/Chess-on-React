@@ -1,24 +1,17 @@
 import { Suspense, useEffect, useState } from "react";
-import { useTelegram } from "./hooks/useTelegram";
-import { LazyGameScreen } from "./components/CustomChessBoard/GameScreen.lazy";
 import MainMenu from "./components/MainMenu/MainMenu";
+import { LazyGameScreen } from "./components/CustomChessBoard/GameScreen.lazy";
+import { LazyOnlineGameScreen } from "./components/CustomChessBoard/OnlineGameScreen.lazy";
 import { Loader } from "./components/Loader/Loader";
 import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
-// import { useTelegramMock } from "./hooks/useTelegramMock";
+import { useSettings } from "./hooks/useSettings";
 import styles from "./App.module.css";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
-  // useTelegramMock(); // Мок только в dev
-  const tg = useTelegram();
 
-  useEffect(() => {
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
-  }, [tg]);
+  useSettings();
 
   // При старте — получаем режим из URL
   useEffect(() => {
@@ -28,10 +21,21 @@ export default function App() {
     }
   }, []);
   // Если режим не меню — отрисовываем игру
-  if (gameMode !== "menu") {
+  if (gameMode === "local" || gameMode === "vs-ai") {
     return (
       <Suspense fallback={<Loader />}>
         <LazyGameScreen
+          initialMode={gameMode}
+          onExitToMenu={() => setGameMode("menu")}
+        />
+      </Suspense>
+    );
+  }
+
+  if (gameMode === "online") {
+    return (
+      <Suspense fallback={<Loader />}>
+        <LazyOnlineGameScreen
           initialMode={gameMode}
           onExitToMenu={() => setGameMode("menu")}
         />

@@ -87,4 +87,5 @@ export type Settings = {
   highlightMoves: boolean;
   animations: boolean;
   sound: boolean;
+  fullscreen: boolean;
 };

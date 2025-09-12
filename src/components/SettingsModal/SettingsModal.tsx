@@ -1,14 +1,12 @@
 import { useSettings } from "@/hooks/useSettings";
-import { Settings } from "@/utils/typeBoard/types";
 import Button from "@/components/Button/Button";
+import SettingsItemInput from "./SettingItemInput/SettingItemInput";
+import SettingsItemSelect from "./SettingsItemSelect/SettingsItemSelect";
+import { isTMA } from "@telegram-apps/bridge";
 import styles from "./SettingsModal.module.css";
 
 export default function SettingsModal({ onBack }: { onBack: () => void }) {
   const { settings, setSettings } = useSettings();
-
-  const handleChange = (key: keyof Settings, value: boolean | string) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
 
   return (
     <div
@@ -21,80 +19,45 @@ export default function SettingsModal({ onBack }: { onBack: () => void }) {
       >
         <h1>Настройки</h1>
         <div className={styles.setting}>
-          <div className={styles.settingItem}>
-            <label htmlFor="theme">Тема:</label>
-            <select
-              id="theme"
-              className={styles.select}
-              value={settings.theme}
-              onChange={(e) => handleChange("theme", e.target.value)}
-            >
-              <option value="dark">Тёмная</option>
-              <option value="light">Светлая</option>
-            </select>
-          </div>
+          <SettingsItemSelect
+            settings={settings}
+            setSettings={setSettings}
+            name="Тема"
+            id="theme"
+          >
+            <option value="dark">Тёмная</option>
+            <option value="light">Светлая</option>
+          </SettingsItemSelect>
 
-          <div className={styles.settingItem}>
-            <span>Подсвечивать возможные ходы</span>
-            <div className={styles.flipswitch}>
-              <input
-                className={styles.flipswitchCb}
-                id="highlightMoves"
-                type="checkbox"
-                checked={settings.highlightMoves}
-                onChange={(e) =>
-                  handleChange("highlightMoves", e.target.checked)
-                }
-              />
-              <label
-                htmlFor="highlightMoves"
-                className={styles.flipswitchLabel}
-              >
-                <div className={styles.flipswitchInner}></div>
-                <div className={styles.flipswitchSwitch}></div>
-              </label>
-            </div>
-          </div>
+          {isTMA() && (
+            <SettingsItemInput
+              settings={settings}
+              setSettings={setSettings}
+              name="Полноэкранный режим"
+              id="fullscreen"
+            />
+          )}
 
-          <div className={styles.settingItem}>
-            <span>Анимации</span>
-            <div className={styles.flipswitch}>
-              <input
-                className={styles.flipswitchCb}
-                id="animations"
-                type="checkbox"
-                checked={settings.animations}
-                onChange={(e) => handleChange("animations", e.target.checked)}
-              />
-              <label
-                htmlFor="animations"
-                className={styles.flipswitchLabel}
-              >
-                <div className={styles.flipswitchInner}></div>
-                <div className={styles.flipswitchSwitch}></div>
-              </label>
-            </div>
-          </div>
+          <SettingsItemInput
+            settings={settings}
+            setSettings={setSettings}
+            name="Подсвечивать возможные ходы"
+            id="highlightMoves"
+          />
 
-          <div className={styles.settingItem}>
-            <span>Звук</span>
-            <div className={styles.flipswitch}>
-              <input
-                className={styles.flipswitchCb}
-                id="sound"
-                type="checkbox"
-                checked={settings.sound}
-                onChange={(e) => handleChange("sound", e.target.checked)}
-              />
-              <label
-                htmlFor="sound"
-                className={styles.flipswitchLabel}
-              >
-                <div className={styles.flipswitchInner}></div>
-                <div className={styles.flipswitchSwitch}></div>
-              </label>
-            </div>
-          </div>
+          <SettingsItemInput
+            settings={settings}
+            setSettings={setSettings}
+            name="Анимации"
+            id="animations"
+          />
+
+          <SettingsItemInput
+            settings={settings}
+            setSettings={setSettings}
+            name="Звук"
+            id="sound"
+          />
 
           <Button
             className={styles.backButton}

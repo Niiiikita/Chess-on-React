@@ -4,7 +4,6 @@ import Button from "../Button/Button";
 import { CapturedPiecesType, GameModeType } from "@/utils/typeBoard/types";
 import CapturedPiecesCount from "../CapturedPiecesCount/CapturedPiecesCount";
 import pieceIconCache from "@/utils/pieceIconCache/pieceIconCache";
-import { useTelegram } from "@/hooks/useTelegram";
 import styles from "./CurrentPlayerComponent.module.css";
 
 /**
@@ -32,7 +31,6 @@ export default memo(function CurrentPlayerComponent({
   className?: string;
   capturedPieces: CapturedPiecesType;
 }) {
-  const tg = useTelegram();
   const KingIcon = pieceIconCache[`king_${currentPlayer}`];
   return (
     <div className={clsx(styles.advanceContainer, className)}>
@@ -64,14 +62,6 @@ export default memo(function CurrentPlayerComponent({
       >
         Новая игра
       </Button>
-      {tg && (
-        <button
-          onClick={() => tg.close()}
-          className={styles.closeButton}
-        >
-          Закрыть игру
-        </button>
-      )}
     </div>
   );
 });
