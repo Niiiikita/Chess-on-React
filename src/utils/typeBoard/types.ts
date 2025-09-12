@@ -1,6 +1,16 @@
 // import type { ReactElement } from "react";
 
-export type GameModeType = "menu" | "vs-ai" | "local" | "online";
+// export type GameModeType =
+//   | "menu"
+//   | "vs-ai"
+//   | "local"
+//   | "online"
+//   | "online-create"
+//   | `online-join-${string}`;
+
+export type LocalOrAiMode = "local" | "vs-ai";
+export type OnlineMode = "online" | "online-create" | `online-join-${string}`;
+export type GameModeType = "menu" | LocalOrAiMode | OnlineMode;
 
 export type CurrentPlayerType = "white" | "black";
 

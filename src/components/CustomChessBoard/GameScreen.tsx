@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import Board from "../Board/Board";
 import { setModeInUrl } from "@/utils/modeUrl/setModeInUrl";
 import { getModeFromUrl } from "@/utils/modeUrl/getModeFromUrl";
-import type { GameModeType } from "@/utils/typeBoard/types";
+import type { GameModeType, LocalOrAiMode } from "@/utils/typeBoard/types";
 
 export function GameScreen({
   initialMode,
   onExitToMenu,
 }: {
-  initialMode: GameModeType;
+  initialMode: LocalOrAiMode;
   onExitToMenu: () => void;
 }) {
   const [gameState, setGameState] = useState<GameModeType>(initialMode);
@@ -23,7 +23,7 @@ export function GameScreen({
 
   // При изменении gameState — обновляем URL
   useEffect(() => {
-    setModeInUrl(gameState);
+    if (gameState === "vs-ai" || gameState === "local") setModeInUrl(gameState);
   }, [gameState]);
 
   // Если gameState стал "menu" — выходим

@@ -1,16 +1,24 @@
-// Получаем текущий режим из URL
+import { GameModeType } from "../typeBoard/types";
+
 /**
  * Извлекает режим из параметров строки запроса URL.
  * @returns режим, извлеченный из URL, который может быть "menu", "local" или "vs-ai".
  */
-export function getModeFromUrl(): "menu" | "local" | "vs-ai" | "online" {
-  // Создаем объект URLSearchParams из текущего URL
+export function getModeFromUrl(): GameModeType {
   const params = new URLSearchParams(window.location.search);
-  // Извлекаем параметр "mode"
   const mode = params.get("mode");
-  // Возвращаем режим или "menu", если режим не указан
+
   if (mode === "local" || mode === "vs-ai") {
     return mode;
   }
+
+  if (mode === "online" || mode === "online-create") {
+    return mode;
+  }
+
+  if (mode?.startsWith("online-join-")) {
+    return mode as `online-join-${string}`;
+  }
+
   return "menu";
 }
