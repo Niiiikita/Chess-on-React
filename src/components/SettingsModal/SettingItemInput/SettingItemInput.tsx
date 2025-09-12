@@ -14,12 +14,15 @@ export default function SettingsItemInput(props: {
     props.setSettings((prev) => ({ ...prev, [key]: value }));
 
     if (isTMA()) {
-      if (viewport.requestFullscreen.isAvailable()) {
-        const fullscreenOpen = async () => await viewport.requestFullscreen();
-        fullscreenOpen();
-      } else if (viewport.exitFullscreen.isAvailable()) {
-        const fullscreenClose = async () => await viewport.exitFullscreen();
-        fullscreenClose();
+      // Только для ключа "fullscreen"
+      if (key === "fullscreen") {
+        if (value === true && viewport.requestFullscreen.isAvailable()) {
+          // Включаем полноэкранный режим
+          viewport.requestFullscreen().catch(console.error);
+        } else if (value === false && viewport.exitFullscreen.isAvailable()) {
+          // Выключаем полноэкранный режим
+          viewport.exitFullscreen().catch(console.error);
+        }
       }
     }
 

@@ -33,11 +33,8 @@ const initializeTelegramSDK = async () => {
     //
     if (viewport.expand.isAvailable()) {
       await viewport.mount();
+      viewport.expand();
     }
-
-    // if (viewport.requestFullscreen.isAvailable()) {
-    //   await viewport.requestFullscreen();
-    // }
 
     // Добавляем лог с задержкой, чтобы eruda успел инициализироваться
     setTimeout(() => {
