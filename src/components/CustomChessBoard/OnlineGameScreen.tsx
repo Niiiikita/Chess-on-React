@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import Board from "../Board/Board";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useOnlineGame } from "@/hooks/useOnlineGame";
-import type { GameModeType } from "@/utils/typeBoard/types";
+import type {
+  GameModeType,
+  GameOverType,
+  PieceData,
+  PieceType,
+} from "@/utils/typeBoard/types";
 import { fenToBoard } from "@/utils/fenBoard/fenToBoard";
 import { getModeFromUrl } from "@/utils/modeUrl/getModeFromUrl";
-import { coordsToSquare } from "@/utils/coordsToSquare/coordsToSquare";
-import { boardToFen } from "@/utils/fenBoard/boardToFen";
-import { ChessGameState } from "@/utils/typeBoard/ChessGameState";
 import { WaitingForOpponent } from "../WaitingForOpponent/WaitingForOpponent";
 
 export function OnlineGameScreen({
@@ -20,10 +22,12 @@ export function OnlineGameScreen({
   const [gameState, setGameState] = useState<GameModeType>(initialMode);
   const [waitingForOpponent, setWaitingForOpponent] = useState<string | null>(
     null
-  ); // ID игры
+  );
   const game = useChessGame();
   const hasJoined = useRef(false);
   const hasCreatedGame = useRef(false);
+
+  const [gameId, setGameId] = useState<string | null>(null);
 
   const {
     createGame,
@@ -33,6 +37,8 @@ export function OnlineGameScreen({
     onGameStarted,
     onGameCreated,
     onError,
+    onSyncState,
+    syncState,
   } = useOnlineGame();
 
   const userId = (() => {
@@ -51,11 +57,7 @@ export function OnlineGameScreen({
     console.log("[OnlineGameScreen] Режим из URL:", mode);
 
     if (mode === "online-create") {
-      if (hasCreatedGame.current) {
-        console.warn("[OnlineGameScreen] Уже создали игру ранее");
-        return;
-      }
-
+      if (hasCreatedGame.current) return;
       console.log("[OnlineGameScreen] Создаём новую игру...");
       createGame(userId);
       hasCreatedGame.current = true;
@@ -63,22 +65,36 @@ export function OnlineGameScreen({
     }
 
     if (mode.startsWith("online-join-")) {
-      const code = mode.split("online-join-")[1];
-      if (hasJoined.current) {
-        console.warn("[OnlineGameScreen] Уже пытались присоединиться");
+      const code = mode.slice("online-join-".length); // ✅ Без .split — безопаснее!
+      if (hasJoined.current) return;
+
+      // ✅ ДОБАВЬТЕ ЭТО:
+      if (code === gameId) {
+        console.error(
+          "[OnlineGameScreen] Вы пытаетесь присоединиться к своей собственной игре!"
+        );
+        setGameState("menu");
         return;
       }
-      console.log("[OnlineGameScreen] Присоединяемся к игре:", code);
+
+      console.log(
+        "[OnlineGameScreen] Пытаюсь присоединиться к игре:",
+        code,
+        "с userId:",
+        userId
+      );
       joinGame(code, userId);
       hasJoined.current = true;
+      setGameId(code); // ✔️ ИСПРАВЛЕНО!
     }
-  }, [createGame, joinGame, userId]);
+  }, [createGame, gameId, joinGame, userId]);
 
   // === 2. Обработка создания игры ===
   useEffect(() => {
     const cleanup = onGameCreated(({ gameId }) => {
       console.log("[OnlineGameScreen] Игра создана!", { gameId });
-      setWaitingForOpponent(gameId); // ← показываем экран ожидания
+      setWaitingForOpponent(gameId);
+      setGameId(gameId); // ✔️ ИСПРАВЛЕНО!
     });
     return cleanup;
   }, [onGameCreated]);
@@ -86,50 +102,111 @@ export function OnlineGameScreen({
   // === 3. Обработка начала игры ===
   useEffect(() => {
     const cleanup = onGameStarted(
-      (data: {
+      ({
+        players,
+        fen,
+        turn,
+        gameId, // ← 🔥 ЭТО НУЖНО ДОБАВИТЬ! Сервер отправляет gameId!
+      }: {
         players: { white: string; black: string };
         fen: string;
         turn: "white" | "black";
+        gameId: string; // ← ✅ ДОБАВИ ЭТОТ ПАРАМЕТР!
       }) => {
-        console.log("[OnlineGameScreen] Игра началась!", data);
+        console.log("[OnlineGameScreen] Игра началась!", {
+          players,
+          fen,
+          turn,
+          gameId, // ← ✅ УБЕДИСЬ, ЧТО ВЫВОДИТСЯ "UZLUI90"
+        });
 
-        // 🔥 Определяем цвет игрока
-        const playerColor = data.players.white === userId ? "white" : "black";
-
-        const newBoard = fenToBoard(data.fen);
+        const newBoard = fenToBoard(fen);
         game.setBoard(newBoard);
+        game.setCurrentPlayer(turn);
 
-        // Устанавливаем, кто ходит
-        if (data.turn === playerColor) {
-          game.setCurrentPlayer(playerColor); // можно ходить
-        } else {
-          game.setCurrentPlayer(data.turn); // ждём хода
-        }
+        // ✅ ПРАВИЛЬНО: устанавливаем реальный gameId от сервера!
+        setGameId(gameId); // ← ✅ ВСЁ! Больше ничего не надо!
 
         setWaitingForOpponent(null);
-      }
-    );
-    return cleanup;
-  }, [game, onGameStarted, userId]);
 
-  // === 4. Ход оппонента ===
-  useEffect(() => {
-    const cleanup = onMoveMade(
-      (data: { fen: string; turn: "white" | "black" }) => {
-        console.log("[OnlineGameScreen] Ход оппонента получен", data); // 🔴 Должен быть в консоли
-        const newBoard = fenToBoard(data.fen);
-        game.setBoard(newBoard); // ✅ Меняем доску
-        game.setCurrentPlayer(data.turn); // ✅ Меняем ход
+        setTimeout(() => {
+          if (gameId) {
+            syncState(gameId);
+          }
+        }, 100);
       }
     );
     return cleanup;
+  }, [game, onGameStarted, syncState, userId]); // ← gameId больше не нужен в зависимости
+
+  // === 4. Ход оппонента — теперь получаем всё от сервера ===
+  useEffect(() => {
+    const handler = (data: {
+      fen: string;
+      turn: "white" | "black";
+      lastMove: { from: string; to: string } | null;
+      capturedPieces: { white: string[]; black: string[] };
+      gameOver: boolean;
+      result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
+    }) => {
+      console.log("[OnlineGameScreen] Ход оппонента получен", data);
+
+      const newBoard = fenToBoard(data.fen);
+      const newLastMove = data.lastMove
+        ? {
+            from: [
+              8 - parseInt(data.lastMove.from[1]), // ← ИСПРАВЛЕНО: from[1], а не to[1]
+              data.lastMove.from.charCodeAt(0) - "a".charCodeAt(0),
+            ] as [number, number], // ← Явное приведение к кортежу
+            to: [
+              8 - parseInt(data.lastMove.to[1]), // ← ИСПРАВЛЕНО: to[1]
+              data.lastMove.to.charCodeAt(0) - "a".charCodeAt(0),
+            ] as [number, number], // ← Явное приведение
+            piece: null,
+          }
+        : null;
+
+      const convertCapturedPiece = (symbol: string): PieceType => {
+        const color = symbol === symbol.toUpperCase() ? "white" : "black";
+        const typeMap: Record<string, PieceData["type"]> = {
+          p: "pawn",
+          r: "rook",
+          n: "knight",
+          b: "bishop",
+          q: "queen",
+          k: "king",
+        };
+        const type = typeMap[symbol.toLowerCase()];
+        if (!type) throw new Error(`Неизвестный символ фигуры: ${symbol}`);
+        return { type, color };
+      };
+
+      game.setBoard(newBoard);
+      game.setCurrentPlayer(data.turn);
+      game.setLastMove(newLastMove);
+      game.setCapturedPieces({
+        white: data.capturedPieces.white.map(convertCapturedPiece),
+        black: data.capturedPieces.black.map(convertCapturedPiece),
+      });
+
+      if (
+        data.gameOver &&
+        (data.result === "checkmate" || data.result === "stalemate")
+      ) {
+        game.setGameOver(data.result);
+      }
+    };
+
+    // 🔥 ВАЖНО: Подписываемся на событие!
+    const cleanup = onMoveMade(handler);
+    return cleanup; // 👈 ОБЯЗАТЕЛЬНО!
   }, [game, onMoveMade]);
 
   // === 5. Ошибки ===
   useEffect(() => {
     const cleanup = onError((message) => {
       console.error("[OnlineGameScreen] Ошибка:", message);
-      game.setHint?.(message);
+      game.setHintWithTimer?.(message);
 
       if (
         message.includes("не найдена") ||
@@ -144,50 +221,119 @@ export function OnlineGameScreen({
     return cleanup;
   }, [game, onError]);
 
-  // === 6. Перехват makeMove для отправки хода ===
+  // === 7. ВОССТАНОВЛЕНИЕ ИГРЫ ИЗ localStorage ===
   useEffect(() => {
-    const originalMakeMove = window.makeMove;
+    const savedGameId = localStorage.getItem("onlineGameId");
+    if (savedGameId && !hasJoined.current && !hasCreatedGame.current) {
+      console.log(
+        "[OnlineGameScreen] Восстанавливаем игру из localStorage:",
+        savedGameId
+      );
+      joinGame(savedGameId, userId);
+      hasJoined.current = true;
+      setGameId(savedGameId);
 
-    window.makeMove = (
-      from: { row: number; col: number },
-      to: { row: number; col: number },
-      context: ChessGameState & { gameState?: GameModeType }
-    ) => {
-      originalMakeMove?.(from, to, context);
+      setTimeout(() => {
+        syncState(savedGameId);
+      }, 100);
+    }
+  }, [joinGame, syncState, userId]);
 
+  // === 8. Сохраняем gameId в localStorage при присоединении ===
+  useEffect(() => {
+    if (gameId && !localStorage.getItem("onlineGameId")) {
+      localStorage.setItem("onlineGameId", gameId);
+      console.log("[OnlineGameScreen] Сохранён gameId в localStorage:", gameId);
+    }
+  }, [gameId]);
+
+  // === 9. Подписка на syncState — чтобы получить актуальное состояние ===
+  useEffect(() => {
+    const handler = (data: {
+      fen: string;
+      turn: "white" | "black";
+      lastMove: { from: string; to: string } | null;
+      capturedPieces: { white: string[]; black: string[] };
+      gameOver: boolean;
+      result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
+      playerColor: "white" | "black" | null;
+    }) => {
+      console.log("[OnlineGameScreen] Получено syncState:", data);
+
+      // ✅ playerColor используется здесь — больше не "ненужная переменная"
+      if (!data.playerColor) return;
+
+      const newBoard = fenToBoard(data.fen);
+      game.setBoard(newBoard);
+      game.setCurrentPlayer(data.turn);
+
+      // ✅ Приведение lastMove
+      if (data.lastMove) {
+        const squareToCoord = (sq: string): [number, number] => {
+          const col = sq.charCodeAt(0) - "a".charCodeAt(0);
+          const row = 8 - parseInt(sq[1]);
+          return [row, col];
+        };
+
+        const fromCoords = squareToCoord(data.lastMove.from);
+        const toCoords = squareToCoord(data.lastMove.to);
+
+        const piece = game.board[fromCoords[0]]?.[fromCoords[1]] || null;
+
+        game.setLastMove({
+          from: fromCoords,
+          to: toCoords,
+          piece,
+        });
+      }
+
+      // ✅ Приведение capturedPieces
+      const convertCaptured = (pieces: string[]): PieceType[] =>
+        pieces.map((p) => ({
+          type: p.toLowerCase() as Extract<
+            PieceType,
+            "pawn" | "rook" | "knight" | "bishop" | "queen" | "king"
+          >,
+          color: p === p.toUpperCase() ? "white" : "black",
+        }));
+
+      game.setCapturedPieces({
+        white: convertCaptured(data.capturedPieces.white),
+        black: convertCaptured(data.capturedPieces.black),
+      });
+
+      // ✅ Приведение result → gameOver
+      let gameOverType: GameOverType = null;
       if (
-        context.gameState?.startsWith("online-join-") &&
-        context.currentPlayer === "black"
+        data.gameOver &&
+        (data.result === "checkmate" || data.result === "stalemate")
       ) {
-        const fen = boardToFen(context.board, "white");
-        const gameId = context.gameState.split("online-join-")[1];
+        gameOverType = data.result;
+      }
+      game.setGameOver(gameOverType);
 
-        transmissionMove(
-          coordsToSquare(from.row, from.col),
-          coordsToSquare(to.row, to.col),
-          fen,
-          "white",
-          gameId
-        );
+      // Если игра началась — скрываем экран ожидания
+      if (waitingForOpponent) {
+        setWaitingForOpponent(null);
       }
     };
 
-    return () => {
-      window.makeMove = originalMakeMove;
-    };
-  }, [transmissionMove]);
+    const cleanup = onSyncState(handler);
+    return cleanup;
+  }, [game, onSyncState, waitingForOpponent]);
 
-  // === 7. Выход в меню ===
+  // === 10. Выход в меню ===
   useEffect(() => {
     if (gameState === "menu") {
       hasCreatedGame.current = false;
       hasJoined.current = false;
       setWaitingForOpponent(null);
+
       onExitToMenu();
     }
-  }, [gameState, onExitToMenu]);
+  }, [gameId, gameState, onExitToMenu]);
 
-  // === 8. Рендер ===
+  // === 11. Рендер ===
   if (waitingForOpponent) {
     return (
       <WaitingForOpponent
@@ -201,6 +347,9 @@ export function OnlineGameScreen({
     <Board
       gameState={gameState}
       setGameState={setGameState}
+      transmissionMove={transmissionMove}
+      gameId={gameId}
+      game={game} // ← ✅ ПЕРЕДАЁМ ВСЁ СОСТОЯНИЕ!
     />
   );
 }

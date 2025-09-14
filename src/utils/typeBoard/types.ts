@@ -29,6 +29,12 @@ export type PieceType = {
   type: "pawn" | "rook" | "knight" | "bishop" | "queen" | "king"; // Фигуры: pawn - пешка, rook - ладья, knight - конь, bishop - слон, queen - королева, king - король
   color: "white" | "black"; // Цвет фигур: white - белый, black - черный
 } | null;
+
+export type PieceData = {
+  type: "pawn" | "rook" | "knight" | "bishop" | "queen" | "king"; // Фигуры: pawn - пешка, rook - ладья, knight - конь, bishop - слон, queen - королева, king - король
+  color: "white" | "black"; // Цвет фигур: white - белый, black - черный
+};
+
 export type Board = PieceType[][];
 
 export type PieceSymbols = {

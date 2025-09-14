@@ -48,6 +48,22 @@ export function useChessGame() {
 
   // Состояние подсказки
   const [hint, setHint] = useState<string | null>(null);
+
+  // Состояние таймаута подсказки
+  const [hintTimeout, setHintTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const setHintWithTimer = (message: string | null) => {
+    if (hintTimeout) clearTimeout(hintTimeout);
+
+    if (message) {
+      const timeoutId = setTimeout(() => {
+        setHint(null);
+      }, 1500);
+      setHintTimeout(timeoutId);
+    }
+    setHint(message);
+  };
+
   // Состояние захваченных фигур
   const [capturedPieces, setCapturedPieces] = useState<CapturedPiecesType>({
     white: [],
@@ -79,6 +95,7 @@ export function useChessGame() {
     setCurrentPlayer,
     hint,
     setHint,
+    setHintWithTimer,
     capturedPieces,
     setCapturedPieces,
     highlightedSquare,

@@ -8,14 +8,9 @@ import { GameModeType } from "./utils/typeBoard/types";
 import { getModeFromUrl } from "./utils/modeUrl/getModeFromUrl";
 import { useSettings } from "./hooks/useSettings";
 import styles from "./App.module.css";
-import { makeMove } from "./utils/logicChess/makeMove";
 
 export default function App() {
   const [gameMode, setGameMode] = useState<"menu" | GameModeType>("menu");
-
-  useEffect(() => {
-    window.makeMove = makeMove; // Добавляем makeMove в глобальный объект window
-  }, []);
 
   useSettings();
 

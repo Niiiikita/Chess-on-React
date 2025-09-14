@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Socket, io } from "socket.io-client";
 
 const SOCKET_URL =
@@ -6,18 +6,18 @@ const SOCKET_URL =
     ? "wss://chess-battle.ru"
     : "http://localhost:3001";
 
-// 🚀 Глобальный синглтон
 let socketInstance: Socket | null = null;
 
 export function useOnlineGame() {
   const socketRef = useRef<Socket | null>(null);
   const initialized = useRef(false);
 
+  // 🔥 Глобальный реф для gameId (доступен внутри замыкания)
+  const [gameId, setGameId] = useState<string | null>(null);
+
   useEffect(() => {
-    // Если уже инициализирован — выходим
     if (initialized.current) return;
 
-    // Создаём сокет только если его ещё нет
     if (!socketInstance) {
       console.log("[useOnlineGame] Создаём новый сокет...");
       socketInstance = io(SOCKET_URL, {
@@ -27,6 +27,12 @@ export function useOnlineGame() {
 
       socketInstance.on("connect", () => {
         console.log("[Socket] Подключён:", socketInstance?.id);
+
+        const storedUserId = localStorage.getItem("chessUserId");
+        if (storedUserId) {
+          socketInstance?.emit("setUserId", storedUserId);
+          console.log("[Socket] Отправлен userId:", storedUserId);
+        }
       });
 
       socketInstance.on("disconnect", (reason) => {
@@ -37,48 +43,47 @@ export function useOnlineGame() {
     socketRef.current = socketInstance;
     initialized.current = true;
 
-    // Функция очистки (не отключаем сокет!)
-    return () => {
-      // ⚠️ Ничего не делаем — сокет остаётся живым
-    };
+    return () => {};
   }, []);
 
-  // Храним ID комнаты
-  const gameIdRef = useRef<string | null>(null);
+  // ✅ ОБЪЯВЛЕНИЕ transmissionMove — ВНУТРИ useOnlineGame
+  const transmissionMove = (from: string, to: string, gameId?: string) => {
+    if (!gameId) {
+      console.warn("[useOnlineGame] Не указан ID игры");
+      return;
+    }
 
-  // Методы
+    console.log("[useOnlineGame] Отправка хода на сервер", {
+      gameId,
+      from,
+      to,
+    });
+
+    socketRef.current?.emit("makeMove", { gameId: gameId, from, to });
+  };
+
   const createGame = (userId: string) => {
     socketRef.current?.emit("createGame", userId);
   };
 
   const joinGame = (gameId: string, userId: string) => {
     socketRef.current?.emit("joinGame", { gameId, userId });
-    gameIdRef.current = gameId;
+    setGameId(gameId); // ← Сохраняем gameId при присоединении
   };
 
-  const transmissionMove = (
-    from: string,
-    to: string,
-    fen: string,
-    turn: "white" | "black",
-    gameId?: string
-  ) => {
-    const id = gameId || gameIdRef.current;
-    if (!id) {
-      console.warn("[useOnlineGame] Не указан ID игры");
-      return;
-    }
-    socketRef.current?.emit("transmissionMove", {
-      gameId: id,
-      from,
-      to,
-      fen,
-      turn,
-    });
+  const syncState = (gameId: string) => {
+    socketRef.current?.emit("syncState", gameId);
   };
 
   const onMoveMade = (
-    callback: ({ fen, turn }: { fen: string; turn: "white" | "black" }) => void
+    callback: (data: {
+      fen: string;
+      turn: "white" | "black";
+      lastMove: { from: string; to: string } | null;
+      capturedPieces: { white: string[]; black: string[] };
+      gameOver: boolean;
+      result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
+    }) => void
   ) => {
     socketRef.current?.on("moveMade", callback);
     return () => {
@@ -87,14 +92,11 @@ export function useOnlineGame() {
   };
 
   const onGameStarted = (
-    callback: ({
-      players,
-      fen,
-      turn,
-    }: {
+    callback: (data: {
       players: { white: string; black: string };
       fen: string;
       turn: "white" | "black";
+      gameId: string; // ✅ Добавлено
     }) => void
   ) => {
     socketRef.current?.on("gameStarted", callback);
@@ -117,6 +119,27 @@ export function useOnlineGame() {
     };
   };
 
+  const onSyncState = (
+    callback: (data: {
+      fen: string;
+      turn: "white" | "black";
+      lastMove: { from: string; to: string } | null;
+      capturedPieces: { white: string[]; black: string[] };
+      gameOver: boolean;
+      result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
+      playerColor: "white" | "black" | null;
+    }) => void
+  ) => {
+    socketRef.current?.on("syncState", callback);
+    return () => {
+      socketRef.current?.off("syncState", callback);
+    };
+  };
+
+  useEffect(() => {
+    console.log("[useOnlineGame] current gameId =", gameId);
+  }, [gameId]);
+
   return {
     createGame,
     joinGame,
@@ -125,5 +148,7 @@ export function useOnlineGame() {
     onGameStarted,
     onGameCreated,
     onError,
+    onSyncState,
+    syncState,
   };
 }

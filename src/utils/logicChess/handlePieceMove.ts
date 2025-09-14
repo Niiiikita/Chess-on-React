@@ -1,7 +1,4 @@
-// import { isCheckmate } from "./isCheckmate";
-// import { isStalemate } from "./isStalemate";
 import { squareToCoords } from "../squareToCoords/squareToCoords";
-import type { GameModeType } from "../typeBoard/types";
 import { ChessGameState } from "../typeBoard/ChessGameState";
 import { coordsToSquare } from "../coordsToSquare/coordsToSquare";
 import { makeMove } from "./makeMove";
@@ -17,10 +14,10 @@ import { makeMove } from "./makeMove";
  * @param context Контекст игры, содержащий доску, игроков, ходы и др.
  */
 export default function handlePieceMove(
-  e: React.DragEvent<HTMLDivElement>,
+  e: React.DragEvent,
   rowIdx: number,
   colIdx: number,
-  context: ChessGameState & { gameState: GameModeType }
+  context: ChessGameState
 ) {
   const {
     board,

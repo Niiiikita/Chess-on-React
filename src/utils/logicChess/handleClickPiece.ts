@@ -9,7 +9,11 @@ export function handleClickPiece(
   piece: PieceType,
   rowIdx: number,
   colIdx: number,
-  context: ReturnType<typeof useChessGame> & { gameState: GameModeType }
+  context: ReturnType<typeof useChessGame> & {
+    gameState: GameModeType;
+    gameId?: string | null;
+    transmissionMove?: (from: string, to: string, gameId?: string) => void;
+  }
 ) {
   // Получаем контекст
   const {
@@ -22,7 +26,10 @@ export function handleClickPiece(
     hasKingMoved,
     hasRookMoved,
     currentPlayer,
-    setHint,
+    setHintWithTimer,
+    gameState,
+    gameId,
+    transmissionMove,
   } = context;
 
   e.preventDefault();
@@ -33,14 +40,23 @@ export function handleClickPiece(
 
     // Проверяем, можно ли сюда пойти
     if (possibleMove.includes(currentSquare)) {
-      makeMove(selectedFrom, { row: rowIdx, col: colIdx }, { ...context });
+      // ✅ ВСЕГДА отправляем ход на сервер, если онлайн
+      if (gameState?.startsWith("online-") && gameId) {
+        const fromSquare = coordsToSquare(selectedFrom.row, selectedFrom.col);
+        const toSquare = coordsToSquare(rowIdx, colIdx);
+        transmissionMove?.(fromSquare, toSquare, gameId);
 
+        // ❌ НЕ ВЫЗЫВАЕМ makeMove() — это сделает сервер!
+        // makeMove(selectedFrom, { row: rowIdx, col: colIdx }, { ...context }); ← УБРАЛИ!
+      } else {
+        // ✅ А если локальный режим — вызываем как обычно
+        makeMove(selectedFrom, { row: rowIdx, col: colIdx }, { ...context });
+      }
+
+      setPossibleMove([]);
+      setSelectedFrom(null);
       return;
     }
-
-    // 1. Если кликнули не по возможному ходу — сбрасываем выбор
-    setPossibleMove([]);
-    setSelectedFrom(null);
   }
 
   // 2. Если клик по фигуре, проверяем, может ли она ходить
@@ -63,9 +79,11 @@ export function handleClickPiece(
 
   // 3. Если сейчас ход другого цвета — показываем сообщение, что ход другого цвета
   if (piece && piece.color !== currentPlayer) {
-    setHint(`Сейчас ход ${currentPlayer === "white" ? "белых" : "чёрных"}!`);
-    setTimeout(() => setHint(null), 1500); // исчезает через 1.5 сек
-    return;
+    setHintWithTimer(
+      `Сейчас ход ${currentPlayer === "white" ? "белых" : "чёрных"}!`
+    );
+  } else {
+    setHintWithTimer(null); // можно опционально
   }
 
   // Если клик по пустому полю и ничего не выбрано — ничего не делаем

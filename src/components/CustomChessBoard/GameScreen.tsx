@@ -3,6 +3,7 @@ import Board from "../Board/Board";
 import { setModeInUrl } from "@/utils/modeUrl/setModeInUrl";
 import { getModeFromUrl } from "@/utils/modeUrl/getModeFromUrl";
 import type { GameModeType, LocalOrAiMode } from "@/utils/typeBoard/types";
+import { useChessGame } from "@/hooks/useChessGame";
 
 export function GameScreen({
   initialMode,
@@ -12,6 +13,7 @@ export function GameScreen({
   onExitToMenu: () => void;
 }) {
   const [gameState, setGameState] = useState<GameModeType>(initialMode);
+  const game = useChessGame();
 
   // При старте — синхронизируем с URL
   useEffect(() => {
@@ -37,6 +39,7 @@ export function GameScreen({
     <Board
       gameState={gameState}
       setGameState={setGameState}
+      game={game}
     />
   );
 }

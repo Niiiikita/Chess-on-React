@@ -1,10 +1,6 @@
 import { memo } from "react";
 import Piece from "../Piece/Piece";
 import { coordsToSquare } from "@/utils/coordsToSquare/coordsToSquare";
-import { handlePieceEnter } from "@/utils/logicChess/handlePieceEnter";
-import { handleClickPiece } from "@/utils/logicChess/handleClickPiece";
-import handlePieceMove from "@/utils/logicChess/handlePieceMove";
-import { useChessGame } from "@/hooks/useChessGame";
 import { GameModeType, PieceType } from "@/utils/typeBoard/types";
 import clsx from "clsx";
 import styles from "./Square.module.css";
@@ -17,10 +13,16 @@ type SquareProps = {
   isLastMoveFrom: boolean;
   isLastMoveTo: boolean;
   possibleMove: string[];
-  game: ReturnType<typeof useChessGame>;
   gameState: GameModeType;
-  handleDragStart: (e: React.DragEvent, row: number, col: number) => void;
+  onDragStart: (e: React.DragEvent, row: number, col: number) => void;
+  onDragEnter: (e: React.DragEvent) => void;
+  onDragLeave: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onClick: (e: React.MouseEvent) => void;
   setHighlightedSquare: React.Dispatch<React.SetStateAction<string | null>>;
+  transmissionMove?: (from: string, to: string, gameId?: string) => void;
+  gameId?: string | null;
 };
 
 export default memo(function Square({
@@ -31,10 +33,12 @@ export default memo(function Square({
   isLastMoveFrom,
   isLastMoveTo,
   possibleMove,
-  game,
-  gameState,
-  handleDragStart,
-  setHighlightedSquare,
+  onDragStart,
+  onDragEnter,
+  onDragLeave,
+  onDragOver,
+  onDrop,
+  onClick,
 }: SquareProps) {
   const squareColor = isLight ? "#f0d9b5" : "#b58863";
   const currentSquare = coordsToSquare(rowIdx, colIdx);
@@ -48,25 +52,12 @@ export default memo(function Square({
         isLastMoveTo && styles.lastMoveTo
       )}
       style={{ backgroundColor: squareColor }}
-      onDragEnter={(e) =>
-        handlePieceEnter(
-          e,
-          rowIdx,
-          colIdx,
-          possibleMove,
-          game.currentPlayer,
-          setHighlightedSquare
-        )
-      }
-      onDragLeave={() => setHighlightedSquare(null)}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        handlePieceMove(e, rowIdx, colIdx, { ...game, gameState });
-        setHighlightedSquare(null);
-      }}
-      onClick={(e) => {
-        handleClickPiece(e, piece, rowIdx, colIdx, { ...game, gameState });
-      }}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onClick={onClick}
+      onDragStart={(e) => onDragStart(e, rowIdx, colIdx)}
     >
       {/* Подсветка возможного хода */}
       {possibleMove.includes(currentSquare) && <div className={styles.move} />}
@@ -77,7 +68,7 @@ export default memo(function Square({
           piece={piece}
           isLastMoveFrom={isLastMoveFrom}
           isLastMoveTo={isLastMoveTo}
-          onDragStart={(e) => handleDragStart(e, rowIdx, colIdx)}
+          onDragStart={(e) => onDragStart(e, rowIdx, colIdx)}
         />
       )}
     </div>

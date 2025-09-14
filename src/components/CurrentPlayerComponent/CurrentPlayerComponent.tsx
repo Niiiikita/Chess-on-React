@@ -19,13 +19,17 @@ import styles from "./CurrentPlayerComponent.module.css";
  * @returns Отрендеренный компонент, отображающий текущего игрока и кнопки управления.
  */
 export default memo(function CurrentPlayerComponent({
+  gameId,
   currentPlayer,
+  gameState,
   setGameState,
   resetGame,
   className,
   capturedPieces,
 }: {
+  gameId?: string | null;
   currentPlayer: "white" | "black";
+  gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
   resetGame: () => void;
   className?: string;
@@ -52,16 +56,29 @@ export default memo(function CurrentPlayerComponent({
 
       <Button
         className={clsx(styles.advanceContainerNewGame)}
-        onClick={() => setGameState("menu")}
+        onClick={() => {
+          setGameState("menu");
+          // ✅ Сохраняем ID игры, чтобы можно было вернуться
+          if (
+            gameId &&
+            !localStorage.getItem("lastOnlineGameId") &&
+            gameState.startsWith("online")
+          ) {
+            localStorage.setItem("lastOnlineGameId", gameId);
+          }
+        }}
       >
         Меню
       </Button>
-      <Button
-        className={styles.advanceContainerReset}
-        onClick={resetGame}
-      >
-        Новая игра
-      </Button>
+
+      {(gameState === "local" || gameState === "vs-ai") && (
+        <Button
+          className={styles.advanceContainerReset}
+          onClick={resetGame}
+        >
+          Новая игра
+        </Button>
+      )}
     </div>
   );
 });
