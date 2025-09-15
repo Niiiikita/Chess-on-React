@@ -20,6 +20,7 @@ import styles from "./CurrentPlayerComponent.module.css";
  */
 export default memo(function CurrentPlayerComponent({
   gameId,
+  transmissionMove,
   currentPlayer,
   gameState,
   setGameState,
@@ -28,6 +29,7 @@ export default memo(function CurrentPlayerComponent({
   capturedPieces,
 }: {
   gameId?: string | null;
+  transmissionMove?: (from: string, to: string, gameId?: string) => void;
   currentPlayer: "white" | "black";
   gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
@@ -36,6 +38,16 @@ export default memo(function CurrentPlayerComponent({
   capturedPieces: CapturedPiecesType;
 }) {
   const KingIcon = pieceIconCache[`king_${currentPlayer}`];
+
+  const handleLeaveGame = () => {
+    if (!gameId) return;
+
+    // Отправляем сигнал серверу
+    transmissionMove?.("LEAVE", "GAME", gameId); // ← Условный ход для отключения
+
+    // Отображаем подсказку оппоненту
+    setGameState("menu"); // или показываем экран "Оппонент покинул игру"
+  };
   return (
     <div className={clsx(styles.advanceContainer, className)}>
       <div className={clsx(styles.advanceContainerCurrentPlayer, className)}>
@@ -58,7 +70,7 @@ export default memo(function CurrentPlayerComponent({
         className={clsx(styles.advanceContainerNewGame)}
         onClick={() => {
           setGameState("menu");
-          // ✅ Сохраняем ID игры, чтобы можно было вернуться
+          // Сохраняем ID игры, чтобы можно было вернуться
           if (
             gameId &&
             !localStorage.getItem("lastOnlineGameId") &&
@@ -77,6 +89,15 @@ export default memo(function CurrentPlayerComponent({
           onClick={resetGame}
         >
           Новая игра
+        </Button>
+      )}
+
+      {gameId && (
+        <Button
+          className={styles.advanceContainerLeave}
+          onClick={handleLeaveGame}
+        >
+          Отключиться
         </Button>
       )}
     </div>

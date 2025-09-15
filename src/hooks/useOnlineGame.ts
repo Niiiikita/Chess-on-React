@@ -136,6 +136,19 @@ export function useOnlineGame() {
     };
   };
 
+  const onGameOver = (
+    callback: (data: {
+      reason: "resignation" | "opponent_left";
+      winner: string;
+      winnerColor: "white" | "black";
+    }) => void
+  ) => {
+    socketRef.current?.on("gameOver", callback);
+    return () => {
+      socketRef.current?.off("gameOver", callback);
+    };
+  };
+
   useEffect(() => {
     console.log("[useOnlineGame] current gameId =", gameId);
   }, [gameId]);
@@ -149,6 +162,7 @@ export function useOnlineGame() {
     onGameCreated,
     onError,
     onSyncState,
+    onGameOver,
     syncState,
   };
 }

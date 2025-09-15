@@ -38,6 +38,7 @@ export function OnlineGameScreen({
     onGameCreated,
     onError,
     onSyncState,
+    onGameOver,
     syncState,
   } = useOnlineGame();
 
@@ -136,8 +137,44 @@ export function OnlineGameScreen({
         }, 100);
       }
     );
+
     return cleanup;
-  }, [game, onGameStarted, syncState, userId]); // ← gameId больше не нужен в зависимости
+  }, [game, onGameStarted, syncState, userId]);
+
+  // === 3.5. Обработка окончания игры ===
+  useEffect(() => {
+    const cleanup = onGameOver(({ reason, winner, winnerColor }) => {
+      console.log("[OnlineGameScreen] Игра завершилась", {
+        reason,
+        winner,
+        winnerColor,
+      });
+
+      if (reason === "resignation" || reason === "opponent_left") {
+        const isWinner = winner === userId;
+        const yourColor = game.currentPlayer;
+
+        if (reason === "opponent_left") {
+          game.setHintWithTimer("Ваш оппонент покинул игру");
+        } else if (isWinner) {
+          game.setHintWithTimer(
+            `Победа за ${yourColor === "white" ? "белыми" : "чёрными"}!`
+          );
+        } else {
+          game.setHintWithTimer(
+            `Вы проиграли. Победил ${
+              winnerColor === "white" ? "белый" : "чёрный"
+            } игрок.`
+          );
+        }
+
+        setWaitingForOpponent(null);
+        setGameState("menu");
+      }
+    });
+
+    return cleanup;
+  }, [game, onGameOver, userId]);
 
   // === 4. Ход оппонента — теперь получаем всё от сервера ===
   useEffect(() => {

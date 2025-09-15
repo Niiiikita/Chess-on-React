@@ -183,6 +183,7 @@ export default function Board({
       {/* Индикатор текущего игрока */}
       <CurrentPlayerComponent
         gameId={gameId}
+        transmissionMove={transmissionMove}
         currentPlayer={currentPlayer}
         gameState={gameState}
         setGameState={setGameState}
