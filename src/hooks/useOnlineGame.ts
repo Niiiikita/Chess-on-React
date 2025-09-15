@@ -6,69 +6,68 @@ const SOCKET_URL =
     ? "wss://chess-battle.ru"
     : "http://localhost:3001";
 
-let socketInstance: Socket | null = null;
-
 export function useOnlineGame() {
   const socketRef = useRef<Socket | null>(null);
   const initialized = useRef(false);
-
-  // 🔥 Глобальный реф для gameId (доступен внутри замыкания)
   const [gameId, setGameId] = useState<string | null>(null);
 
+  // 🔥 Инициализация сокета — ТОЛЬКО при первом вызове хука (т.е. когда компонент монтируется)
   useEffect(() => {
     if (initialized.current) return;
 
-    if (!socketInstance) {
-      console.log("[useOnlineGame] Создаём новый сокет...");
-      socketInstance = io(SOCKET_URL, {
-        transports: ["websocket"],
-        autoConnect: true,
-      });
+    console.log("[useOnlineGame] Создаём новый сокет...");
+    socketRef.current = io(SOCKET_URL, {
+      transports: ["websocket"],
+      autoConnect: true,
+    });
 
-      socketInstance.on("connect", () => {
-        console.log("[Socket] Подключён:", socketInstance?.id);
+    socketRef.current.on("connect", () => {
+      console.log("[Socket] Подключён:", socketRef.current?.id);
+      const storedUserId = localStorage.getItem("chessUserId");
+      if (storedUserId) {
+        socketRef.current?.emit("setUserId", storedUserId);
+        console.log("[Socket] Отправлен userId:", storedUserId);
+      }
+    });
 
-        const storedUserId = localStorage.getItem("chessUserId");
-        if (storedUserId) {
-          socketInstance?.emit("setUserId", storedUserId);
-          console.log("[Socket] Отправлен userId:", storedUserId);
-        }
-      });
+    socketRef.current.on("disconnect", (reason) => {
+      console.warn("[Socket] Отключён:", reason);
+    });
 
-      socketInstance.on("disconnect", (reason) => {
-        console.warn("[Socket] Отключён:", reason);
-      });
-    }
-
-    socketRef.current = socketInstance;
     initialized.current = true;
 
     return () => {};
-  }, []);
+  }, []); // ← Пустой массив — запускается только один раз при монтировании
 
-  // ✅ ОБЪЯВЛЕНИЕ transmissionMove — ВНУТРИ useOnlineGame
-  const transmissionMove = (from: string, to: string, gameId?: string) => {
-    if (!gameId) {
-      console.warn("[useOnlineGame] Не указан ID игры");
-      return;
-    }
-
-    console.log("[useOnlineGame] Отправка хода на сервер", {
-      gameId,
-      from,
-      to,
-    });
-
-    socketRef.current?.emit("makeMove", { gameId: gameId, from, to });
-  };
-
+  // ✅ Функции для взаимодействия с сервером
   const createGame = (userId: string) => {
     socketRef.current?.emit("createGame", userId);
   };
 
   const joinGame = (gameId: string, userId: string) => {
     socketRef.current?.emit("joinGame", { gameId, userId });
-    setGameId(gameId); // ← Сохраняем gameId при присоединении
+    setGameId(gameId);
+  };
+
+  const transmissionMove = (from: string, to: string, gameId?: string) => {
+    const id = gameId || localStorage.getItem("onlineGameId");
+    if (!id) {
+      console.warn("[useOnlineGame] Не указан ID игры");
+      return;
+    }
+
+    console.log("[useOnlineGame] Отправка хода на сервер", {
+      gameId: id,
+      from,
+      to,
+    });
+
+    socketRef.current?.emit("makeMove", { gameId: id, from, to });
+  };
+
+  const resignGame = (gameId: string) => {
+    console.log("[useOnlineGame] Игрок отказался от игры");
+    socketRef.current?.emit("resign", gameId);
   };
 
   const syncState = (gameId: string) => {
@@ -96,7 +95,7 @@ export function useOnlineGame() {
       players: { white: string; black: string };
       fen: string;
       turn: "white" | "black";
-      gameId: string; // ✅ Добавлено
+      gameId: string;
     }) => void
   ) => {
     socketRef.current?.on("gameStarted", callback);
@@ -149,6 +148,7 @@ export function useOnlineGame() {
     };
   };
 
+  // 📊 Полезный лог для отладки
   useEffect(() => {
     console.log("[useOnlineGame] current gameId =", gameId);
   }, [gameId]);
@@ -157,12 +157,13 @@ export function useOnlineGame() {
     createGame,
     joinGame,
     transmissionMove,
+    resignGame,
+    syncState,
     onMoveMade,
     onGameStarted,
     onGameCreated,
     onError,
     onSyncState,
     onGameOver,
-    syncState,
   };
 }

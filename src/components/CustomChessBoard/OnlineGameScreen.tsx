@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Board from "../Board/Board";
 import { useChessGame } from "@/hooks/useChessGame";
 import { useOnlineGame } from "@/hooks/useOnlineGame";
@@ -11,6 +11,7 @@ import type {
 import { fenToBoard } from "@/utils/fenBoard/fenToBoard";
 import { getModeFromUrl } from "@/utils/modeUrl/getModeFromUrl";
 import { WaitingForOpponent } from "../WaitingForOpponent/WaitingForOpponent";
+import { LazyGameOverModal } from "../GameOver/GameOverModal.lazy";
 
 export function OnlineGameScreen({
   initialMode,
@@ -29,6 +30,12 @@ export function OnlineGameScreen({
 
   const [gameId, setGameId] = useState<string | null>(null);
 
+  const [gameOverReason, setGameOverReason] = useState<{
+    reason: "opponent_left" | "resignation";
+    winner: string;
+    winnerColor: "white" | "black";
+  } | null>(null);
+
   const {
     createGame,
     joinGame,
@@ -40,6 +47,7 @@ export function OnlineGameScreen({
     onSyncState,
     onGameOver,
     syncState,
+    resignGame,
   } = useOnlineGame();
 
   const userId = (() => {
@@ -66,10 +74,9 @@ export function OnlineGameScreen({
     }
 
     if (mode.startsWith("online-join-")) {
-      const code = mode.slice("online-join-".length); // ✅ Без .split — безопаснее!
+      const code = mode.slice("online-join-".length);
       if (hasJoined.current) return;
 
-      // ✅ ДОБАВЬТЕ ЭТО:
       if (code === gameId) {
         console.error(
           "[OnlineGameScreen] Вы пытаетесь присоединиться к своей собственной игре!"
@@ -107,26 +114,25 @@ export function OnlineGameScreen({
         players,
         fen,
         turn,
-        gameId, // ← 🔥 ЭТО НУЖНО ДОБАВИТЬ! Сервер отправляет gameId!
+        gameId,
       }: {
         players: { white: string; black: string };
         fen: string;
         turn: "white" | "black";
-        gameId: string; // ← ✅ ДОБАВИ ЭТОТ ПАРАМЕТР!
+        gameId: string;
       }) => {
         console.log("[OnlineGameScreen] Игра началась!", {
           players,
           fen,
           turn,
-          gameId, // ← ✅ УБЕДИСЬ, ЧТО ВЫВОДИТСЯ "UZLUI90"
+          gameId,
         });
 
         const newBoard = fenToBoard(fen);
         game.setBoard(newBoard);
         game.setCurrentPlayer(turn);
 
-        // ✅ ПРАВИЛЬНО: устанавливаем реальный gameId от сервера!
-        setGameId(gameId); // ← ✅ ВСЁ! Больше ничего не надо!
+        setGameId(gameId);
 
         setWaitingForOpponent(null);
 
@@ -151,6 +157,14 @@ export function OnlineGameScreen({
       });
 
       if (reason === "resignation" || reason === "opponent_left") {
+        // Сохраняем причину и результат
+        setGameOverReason({
+          reason,
+          winner,
+          winnerColor,
+        });
+
+        // Показываем подсказку (опционально)
         const isWinner = winner === userId;
         const yourColor = game.currentPlayer;
 
@@ -168,8 +182,8 @@ export function OnlineGameScreen({
           );
         }
 
-        setWaitingForOpponent(null);
-        setGameState("menu");
+        localStorage.removeItem("onlineGameId"); // ← ОЧИЩАЕМ СТАРЫЙ GAMEID!
+        localStorage.removeItem("lastOnlineGameId"); // ← ОЧИЩАЕМ И ЭТО, если есть
       }
     });
 
@@ -234,9 +248,8 @@ export function OnlineGameScreen({
       }
     };
 
-    // 🔥 ВАЖНО: Подписываемся на событие!
     const cleanup = onMoveMade(handler);
-    return cleanup; // 👈 ОБЯЗАТЕЛЬНО!
+    return cleanup;
   }, [game, onMoveMade]);
 
   // === 5. Ошибки ===
@@ -260,6 +273,13 @@ export function OnlineGameScreen({
 
   // === 7. ВОССТАНОВЛЕНИЕ ИГРЫ ИЗ localStorage ===
   useEffect(() => {
+    const mode = getModeFromUrl();
+
+    // Не восстанавливаем, если пользователь уже в режиме создания/присоединения
+    if (mode === "online-create" || mode.startsWith("online-join-")) {
+      return; // Пропускаем восстановление — оно не нужно!
+    }
+
     const savedGameId = localStorage.getItem("onlineGameId");
     if (savedGameId && !hasJoined.current && !hasCreatedGame.current) {
       console.log(
@@ -297,14 +317,14 @@ export function OnlineGameScreen({
     }) => {
       console.log("[OnlineGameScreen] Получено syncState:", data);
 
-      // ✅ playerColor используется здесь — больше не "ненужная переменная"
+      // playerColor используется здесь — больше не "ненужная переменная"
       if (!data.playerColor) return;
 
       const newBoard = fenToBoard(data.fen);
       game.setBoard(newBoard);
       game.setCurrentPlayer(data.turn);
 
-      // ✅ Приведение lastMove
+      // Приведение lastMove
       if (data.lastMove) {
         const squareToCoord = (sq: string): [number, number] => {
           const col = sq.charCodeAt(0) - "a".charCodeAt(0);
@@ -324,7 +344,7 @@ export function OnlineGameScreen({
         });
       }
 
-      // ✅ Приведение capturedPieces
+      // Приведение capturedPieces
       const convertCaptured = (pieces: string[]): PieceType[] =>
         pieces.map((p) => ({
           type: p.toLowerCase() as Extract<
@@ -339,7 +359,7 @@ export function OnlineGameScreen({
         black: convertCaptured(data.capturedPieces.black),
       });
 
-      // ✅ Приведение result → gameOver
+      // Приведение result → gameOver
       let gameOverType: GameOverType = null;
       if (
         data.gameOver &&
@@ -375,8 +395,22 @@ export function OnlineGameScreen({
     return (
       <WaitingForOpponent
         gameId={waitingForOpponent}
-        onBack={() => setGameState("menu")}
+        setGameState={setGameState}
+        resignGame={resignGame}
       />
+    );
+  }
+
+  if (gameOverReason) {
+    return (
+      <Suspense fallback={<div>Загрузка...</div>}>
+        <LazyGameOverModal
+          reason={gameOverReason.reason}
+          winner={gameOverReason.winner}
+          userId={userId}
+          setGameState={setGameState}
+        />
+      </Suspense>
     );
   }
 
@@ -386,7 +420,8 @@ export function OnlineGameScreen({
       setGameState={setGameState}
       transmissionMove={transmissionMove}
       gameId={gameId}
-      game={game} // ← ✅ ПЕРЕДАЁМ ВСЁ СОСТОЯНИЕ!
+      game={game}
+      resign={resignGame}
     />
   );
 }

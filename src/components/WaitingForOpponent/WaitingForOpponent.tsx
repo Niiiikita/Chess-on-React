@@ -1,12 +1,16 @@
+import React from "react";
 import Button from "../Button/Button";
 import styles from "./WaitingForOpponent.module.css";
+import { GameModeType } from "@/utils/typeBoard/types";
 
 export function WaitingForOpponent({
   gameId,
-  onBack,
+  setGameState,
+  resignGame,
 }: {
   gameId: string;
-  onBack: () => void;
+  setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
+  resignGame: (gameId: string) => void; // ← Тип: функция, принимающая gameId
 }) {
   const shareLink = `${window.location.origin}?mode=online-join-${gameId}`;
 
@@ -33,7 +37,15 @@ export function WaitingForOpponent({
           >
             📋 Скопировать ссылку
           </Button>
-          <Button onClick={onBack}>← Назад</Button>
+          <Button
+            onClick={() => {
+              localStorage.removeItem("onlineGameId");
+              resignGame(gameId);
+              setGameState("menu");
+            }}
+          >
+            ← Назад
+          </Button>
         </div>
       </div>
     </div>

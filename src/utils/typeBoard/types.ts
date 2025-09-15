@@ -105,3 +105,40 @@ export type Settings = {
   sound: boolean;
   fullscreen: boolean;
 };
+
+// --- ТИПЫ ДЛЯ КОЛБЭКОВ ---
+export type MoveMadeData = {
+  fen: string;
+  turn: "white" | "black";
+  lastMove: { from: string; to: string } | null;
+  capturedPieces: { white: string[]; black: string[] };
+  gameOver: boolean;
+  result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
+};
+
+export type GameStartedData = {
+  players: { white: string; black: string };
+  fen: string;
+  turn: "white" | "black";
+  gameId: string;
+};
+
+export type GameCreatedData = {
+  gameId: string;
+};
+
+export type SyncStateData = {
+  fen: string;
+  turn: "white" | "black";
+  lastMove: { from: string; to: string } | null;
+  capturedPieces: { white: string[]; black: string[] };
+  gameOver: boolean;
+  result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
+  playerColor: "white" | "black" | null;
+};
+
+export type GameOverData = {
+  reason: "resignation" | "opponent_left";
+  winner: string;
+  winnerColor: "white" | "black";
+};

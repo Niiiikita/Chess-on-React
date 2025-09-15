@@ -19,12 +19,14 @@ export default function Board({
   setGameState,
   transmissionMove,
   gameId,
+  resign,
   game,
 }: {
   gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
   transmissionMove?: (from: string, to: string, gameId?: string) => void;
   gameId?: string | null;
+  resign?: (gameId: string) => void; // ← ТИП
   game: ReturnType<typeof useChessGame>;
 }) {
   const {
@@ -183,7 +185,8 @@ export default function Board({
       {/* Индикатор текущего игрока */}
       <CurrentPlayerComponent
         gameId={gameId}
-        transmissionMove={transmissionMove}
+        resign={resign} // ← ✅ ПЕРЕДАЁМ ФУНКЦИЮ
+        // transmissionMove={transmissionMove}
         currentPlayer={currentPlayer}
         gameState={gameState}
         setGameState={setGameState}
@@ -208,7 +211,7 @@ export default function Board({
       {gameOver && (
         <Suspense fallback={null}>
           <LazyGameOverModal
-            {...game}
+            game={game}
             setGameState={setGameState}
           />
         </Suspense>

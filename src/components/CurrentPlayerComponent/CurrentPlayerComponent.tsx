@@ -20,7 +20,8 @@ import styles from "./CurrentPlayerComponent.module.css";
  */
 export default memo(function CurrentPlayerComponent({
   gameId,
-  transmissionMove,
+  resign, // ← ДОБАВЛЯЕМ ЭТОТ ПРОПС!
+  // transmissionMove,
   currentPlayer,
   gameState,
   setGameState,
@@ -29,7 +30,7 @@ export default memo(function CurrentPlayerComponent({
   capturedPieces,
 }: {
   gameId?: string | null;
-  transmissionMove?: (from: string, to: string, gameId?: string) => void;
+  resign?: (gameId: string) => void;
   currentPlayer: "white" | "black";
   gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
@@ -40,14 +41,10 @@ export default memo(function CurrentPlayerComponent({
   const KingIcon = pieceIconCache[`king_${currentPlayer}`];
 
   const handleLeaveGame = () => {
-    if (!gameId) return;
-
-    // Отправляем сигнал серверу
-    transmissionMove?.("LEAVE", "GAME", gameId); // ← Условный ход для отключения
-
-    // Отображаем подсказку оппоненту
-    setGameState("menu"); // или показываем экран "Оппонент покинул игру"
+    if (!gameId || !resign) return;
+    resign(gameId);
   };
+
   return (
     <div className={clsx(styles.advanceContainer, className)}>
       <div className={clsx(styles.advanceContainerCurrentPlayer, className)}>
