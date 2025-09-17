@@ -20,8 +20,7 @@ import styles from "./CurrentPlayerComponent.module.css";
  */
 export default memo(function CurrentPlayerComponent({
   gameId,
-  resign, // ← ДОБАВЛЯЕМ ЭТОТ ПРОПС!
-  // transmissionMove,
+  resign,
   currentPlayer,
   gameState,
   setGameState,
@@ -63,22 +62,14 @@ export default memo(function CurrentPlayerComponent({
 
       <CapturedPiecesCount captured={capturedPieces} />
 
-      <Button
-        className={clsx(styles.advanceContainerNewGame)}
-        onClick={() => {
-          setGameState("menu");
-          // Сохраняем ID игры, чтобы можно было вернуться
-          if (
-            gameId &&
-            !localStorage.getItem("lastOnlineGameId") &&
-            gameState.startsWith("online")
-          ) {
-            localStorage.setItem("lastOnlineGameId", gameId);
-          }
-        }}
-      >
-        Меню
-      </Button>
+      {(gameState === "local" || gameState === "vs-ai") && (
+        <Button
+          className={clsx(styles.advanceContainerNewGame)}
+          onClick={() => setGameState("menu")}
+        >
+          Меню
+        </Button>
+      )}
 
       {(gameState === "local" || gameState === "vs-ai") && (
         <Button
@@ -89,7 +80,7 @@ export default memo(function CurrentPlayerComponent({
         </Button>
       )}
 
-      {gameId && (
+      {gameId && gameState.startsWith("online") && (
         <Button
           className={styles.advanceContainerLeave}
           onClick={handleLeaveGame}

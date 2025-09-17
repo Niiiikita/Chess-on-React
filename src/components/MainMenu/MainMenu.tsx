@@ -15,29 +15,12 @@ export default function MainMenu({
     return <SettingsModal onBack={() => setShowSettings(false)} />;
   }
 
-  const lastGameId = localStorage.getItem("lastOnlineGameId");
-
-  function handleMenuButton() {
-    window.location.href = `/game?mode=online-join-${lastGameId}`;
-    localStorage.removeItem("lastOnlineGameId");
-  }
-
   return (
     <div className={styles.menuOverlay}>
       <h1>
         <span>♔</span> Шахматы <span>♚</span>
       </h1>
       <div className={styles.menu}>
-        {lastGameId && (
-          <Button
-            onClick={() => handleMenuButton()}
-            className={styles.menuButton}
-            style={{ backgroundColor: "Highlight" }}
-          >
-            Вернуться в игру
-          </Button>
-        )}
-
         <Button
           onClick={() => onStartGame("local")}
           className={styles.menuButton}

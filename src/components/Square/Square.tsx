@@ -20,8 +20,12 @@ type SquareProps = {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onClick: (e: React.MouseEvent) => void;
-  setHighlightedSquare: React.Dispatch<React.SetStateAction<string | null>>;
-  transmissionMove?: (from: string, to: string, gameId?: string) => void;
+  transmissionMove?: (
+    from: string,
+    to: string,
+    gameId?: string,
+    promotion?: "q" | "r" | "b" | "n"
+  ) => void;
   gameId?: string | null;
 };
 

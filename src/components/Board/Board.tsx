@@ -24,7 +24,12 @@ export default function Board({
 }: {
   gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
-  transmissionMove?: (from: string, to: string, gameId?: string) => void;
+  transmissionMove?: (
+    from: string,
+    to: string,
+    gameId?: string,
+    promotion?: "q" | "r" | "b" | "n"
+  ) => void;
   gameId?: string | null;
   resign?: (gameId: string) => void; // ← ТИП
   game: ReturnType<typeof useChessGame>;
@@ -151,7 +156,6 @@ export default function Board({
                   onDragOver={handleSquareDragOver}
                   onDrop={(e) => handleSquareDrop(e, rowIdx, colIdx)}
                   onClick={(e) => handleSquareClick(e, rowIdx, colIdx)}
-                  setHighlightedSquare={setHighlightedSquare}
                   transmissionMove={transmissionMove}
                   gameId={gameId}
                 />
@@ -160,6 +164,7 @@ export default function Board({
           )}
         </div>
       </div>
+
       {/* Подсказка */}
       {hint && (
         <Hint
@@ -185,8 +190,7 @@ export default function Board({
       {/* Индикатор текущего игрока */}
       <CurrentPlayerComponent
         gameId={gameId}
-        resign={resign} // ← ✅ ПЕРЕДАЁМ ФУНКЦИЮ
-        // transmissionMove={transmissionMove}
+        resign={resign}
         currentPlayer={currentPlayer}
         gameState={gameState}
         setGameState={setGameState}

@@ -49,7 +49,12 @@ export function useOnlineGame() {
     setGameId(gameId);
   };
 
-  const transmissionMove = (from: string, to: string, gameId?: string) => {
+  const transmissionMove = (
+    from: string,
+    to: string,
+    gameId?: string,
+    promotion?: "q" | "r" | "b" | "n"
+  ) => {
     const id = gameId || localStorage.getItem("onlineGameId");
     if (!id) {
       console.warn("[useOnlineGame] Не указан ID игры");
@@ -60,18 +65,15 @@ export function useOnlineGame() {
       gameId: id,
       from,
       to,
+      promotion, // ← ✅ ПЕРЕДАЁМ ЕГО!
     });
 
-    socketRef.current?.emit("makeMove", { gameId: id, from, to });
+    socketRef.current?.emit("makeMove", { gameId: id, from, to, promotion });
   };
 
   const resignGame = (gameId: string) => {
     console.log("[useOnlineGame] Игрок отказался от игры");
     socketRef.current?.emit("resign", gameId);
-  };
-
-  const syncState = (gameId: string) => {
-    socketRef.current?.emit("syncState", gameId);
   };
 
   const onMoveMade = (
@@ -158,7 +160,6 @@ export function useOnlineGame() {
     joinGame,
     transmissionMove,
     resignGame,
-    syncState,
     onMoveMade,
     onGameStarted,
     onGameCreated,
