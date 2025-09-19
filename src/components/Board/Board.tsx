@@ -43,6 +43,7 @@ export default function Board({
     setHint,
     currentPlayer,
     setCurrentPlayer,
+    myColor,
     promotion,
     setPromotion,
     lastMove,
@@ -221,6 +222,8 @@ export default function Board({
             gameId={gameId}
             gameState={gameState}
             setGameState={setGameState}
+            currentPlayer={currentPlayer}
+            myColor={myColor}
             resign={resign}
           />
         </Suspense>

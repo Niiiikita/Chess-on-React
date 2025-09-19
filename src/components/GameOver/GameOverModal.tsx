@@ -11,6 +11,8 @@ type GameOverModalProps = {
   reason?: "resignation" | "opponent_left";
   winner?: string;
   userId?: string;
+  myColor?: "white" | "black";
+  currentPlayer?: "white" | "black";
   resign?: (gameId: string) => void; // ← ТИП
 };
 
@@ -22,6 +24,8 @@ export default function GameOverModal({
   reason,
   winner,
   userId,
+  myColor,
+  currentPlayer,
   resign,
 }: GameOverModalProps) {
   const isWinner = winner === userId;
@@ -32,14 +36,19 @@ export default function GameOverModal({
       : "Вы проиграли!";
   } else if (reason === "resignation") {
     message = isWinner ? "Вы победили! Оппонент сдался" : "Вы проиграли!";
+  } else if (game?.gameOver === "checkmate") {
+    message =
+      myColor !== currentPlayer
+        ? "Это Мат! Поздравляем, Вы победили!"
+        : "Вы проиграли!";
+  } else if (game?.gameOver === "stalemate") {
+    message = "Ничья!";
   }
+
+  // Если игра не доступна (нет игры) и игра онлайн
   const isGameAvailable = !!game && !gameState?.startsWith("online");
   const titleGameOver =
-    message.length !== 0
-      ? message
-      : game?.gameOver === "checkmate"
-      ? "Мат!"
-      : "Пат!";
+    typeof message === "string" && message.length > 0 ? message : "Game Over";
 
   return (
     <div className={styles.gameOverModal}>

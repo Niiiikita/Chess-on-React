@@ -31,57 +31,141 @@ export function handleClickPiece(
     hasKingMoved,
     hasRookMoved,
     currentPlayer,
+    myColor,
     setHintWithTimer,
   } = context;
 
   e.preventDefault();
 
-  // 1. Если уже выбрана фигура и текущее поле — в списке возможных ходов
-  if (selectedFrom !== null) {
-    const currentSquare = coordsToSquare(rowIdx, colIdx);
+  const currentSquare = coordsToSquare(rowIdx, colIdx);
 
-    // Проверяем, можно ли сюда пойти
+  // ✅ ШАГ 1: ЕСЛИ УЖЕ ВЫБРАНА ФИГУРА — ПРОВЕРЯЕМ, МОЖНО ЛИ СЮДА ПОЙТИ
+  if (selectedFrom !== null) {
     if (possibleMove.includes(currentSquare)) {
-      // ✅ ВСЕГДА вызываем makeMove — он знает всё: превращение, взятие на проходе, рокировку
       makeMove(
         { row: selectedFrom.row, col: selectedFrom.col },
         { row: rowIdx, col: colIdx },
         { ...context }
       );
-
       setSelectedFrom(null);
       setPossibleMove([]);
+      setHintWithTimer(null);
+      return;
+    }
+
+    // ❌ Не цель — но может, кликнули на другую свою фигуру?
+    if (piece && piece.color === currentPlayer) {
+      // Продолжим к шагу 4
+    } else {
+      setSelectedFrom(null);
+      setPossibleMove([]);
+      setHintWithTimer(null);
       return;
     }
   }
 
-  // 2. Если клик по фигуре, проверяем, может ли она ходить
-  if (piece) {
-    // Только если фигура того же цвета, показываем ходы
-    if (piece.color === currentPlayer) {
-      const moves = getLegalMoves(
-        piece,
-        rowIdx,
-        colIdx,
-        board,
-        lastMove,
-        hasKingMoved,
-        hasRookMoved
-      );
-      setPossibleMove(moves);
+  // ✅ ШАГ 2: КЛИК НА ПУСТУЮ КЛЕТКУ — СБРАСЫВАЕМ
+  if (!piece) {
+    setSelectedFrom(null);
+    setPossibleMove([]);
+    setHintWithTimer(null);
+    return;
+  }
 
-      setSelectedFrom({ row: rowIdx, col: colIdx });
+  // ✅ ШАГ 3: ПРОВЕРКА — ЭТО НЕ МОЙ ХОД? (ОНЛАЙН)
+  if (context.gameState.startsWith("online")) {
+    if (currentPlayer !== myColor) {
+      // ❌ Не ваш ход — нельзя ничего делать
+      setSelectedFrom(null);
+      setPossibleMove([]);
+      setHintWithTimer(
+        `Сейчас ход ${currentPlayer === "white" ? "белых" : "чёрных"}!`
+      );
+      return;
+    }
+
+    // ✅ Ваш ход — но можно только свою фигуру
+    if (piece.color !== myColor) {
+      setSelectedFrom(null);
+      setPossibleMove([]);
+      setHintWithTimer("Это фигура вашего оппонента!");
+      return;
     }
   }
 
-  // 3. Если сейчас ход другого цвета — показываем сообщение, что ход другого цвета
-  if (piece && piece.color !== currentPlayer) {
-    setHintWithTimer(
-      `Сейчас ход ${currentPlayer === "white" ? "белых" : "чёрных"}!`
-    );
-  } else {
-    setHintWithTimer(null); // можно опционально
+  // ✅ ШАГ 4: ПРОВЕРКА — ЛОКАЛЬНЫЕ РЕЖИМЫ (local / vs-ai)
+  if (context.gameState === "local" || context.gameState === "vs-ai") {
+    if (piece.color !== currentPlayer) {
+      setSelectedFrom(null);
+      setPossibleMove([]);
+      setHintWithTimer(
+        `Сейчас ход ${currentPlayer === "white" ? "белых" : "чёрных"}!`
+      );
+      return;
+    }
   }
 
-  // Если клик по пустому полю и ничего не выбрано — ничего не делаем
+  // ✅ ШАГ 5: КЛИК НА СВОЮ ФИГУРУ — ПОКАЗЫВАЕМ ХОДЫ
+  if (
+    (context.gameState.startsWith("online") && piece.color === myColor) ||
+    ((context.gameState === "local" || context.gameState === "vs-ai") &&
+      piece.color === currentPlayer)
+  ) {
+    if (
+      selectedFrom &&
+      selectedFrom.row === rowIdx &&
+      selectedFrom.col === colIdx
+    ) {
+      setSelectedFrom(null);
+      setPossibleMove([]);
+      setHintWithTimer(null);
+      return;
+    }
+
+    const moves = getLegalMoves(
+      piece,
+      rowIdx,
+      colIdx,
+      board,
+      lastMove,
+      hasKingMoved,
+      hasRookMoved
+    );
+
+    setSelectedFrom({ row: rowIdx, col: colIdx });
+    setPossibleMove(moves);
+    setHintWithTimer(null);
+    return;
+  }
+
+  // ✅ ШАГ 6: КЛИК НА ЧУЖУЮ ФИГУРУ — ПРОВЕРЯЕМ, МОЖНО ЛИ ТУДА ПОЙТИ
+  if (
+    (context.gameState.startsWith("online") && piece.color !== myColor) ||
+    ((context.gameState === "local" || context.gameState === "vs-ai") &&
+      piece.color !== currentPlayer)
+  ) {
+    if (possibleMove.includes(currentSquare)) {
+      if (selectedFrom) {
+        makeMove(
+          { row: selectedFrom.row, col: selectedFrom.col },
+          { row: rowIdx, col: colIdx },
+          { ...context }
+        );
+        setSelectedFrom(null);
+        setPossibleMove([]);
+        setHintWithTimer(null);
+        return;
+      }
+    }
+
+    setSelectedFrom(null);
+    setPossibleMove([]);
+    setHintWithTimer(null);
+    return;
+  }
+
+  // ✅ Защита
+  setSelectedFrom(null);
+  setPossibleMove([]);
+  setHintWithTimer(null);
 }

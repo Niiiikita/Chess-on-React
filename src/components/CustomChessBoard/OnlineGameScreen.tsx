@@ -129,6 +129,10 @@ export function OnlineGameScreen({
         game.setBoard(newBoard);
         game.setCurrentPlayer(turn);
 
+        // ✅ ✅ ✅ ЭТО ПРАВИЛЬНО — УСТАНАВЛИВАЕМ СВОЙ ЦВЕТ!
+        const myColor = userId === players.white ? "white" : "black";
+        game.setMyColor(myColor); // ← ✅ ТАК!
+
         setGameId(gameId);
 
         setWaitingForOpponent(null);

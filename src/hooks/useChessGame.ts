@@ -23,6 +23,8 @@ export function useChessGame() {
   // Состояние текущего игрока
   const [currentPlayer, setCurrentPlayer] =
     useState<CurrentPlayerType>("white");
+  // Состояние цвета игрока
+  const [myColor, setMyColor] = useState<"white" | "black">("white");
   // Состояние игрового поля
   const [board, setBoard] = useState(setupInitialBoard());
   // Состояние возможных ходов
@@ -93,6 +95,8 @@ export function useChessGame() {
     setHasRookMoved,
     currentPlayer,
     setCurrentPlayer,
+    myColor,
+    setMyColor,
     hint,
     setHint,
     setHintWithTimer,
