@@ -5,18 +5,24 @@ import styles from "./GameOverModal.module.css";
 
 type GameOverModalProps = {
   setGameState: (gameState: GameModeType) => void;
+  gameState?: GameModeType;
   game?: Partial<ReturnType<typeof useChessGame>>;
+  gameId?: string | null;
   reason?: "resignation" | "opponent_left";
   winner?: string;
   userId?: string;
+  resign?: (gameId: string) => void; // ← ТИП
 };
 
 export default function GameOverModal({
+  gameState,
   setGameState,
+  gameId,
   game,
   reason,
   winner,
   userId,
+  resign,
 }: GameOverModalProps) {
   const isWinner = winner === userId;
   let message = "";
@@ -27,7 +33,7 @@ export default function GameOverModal({
   } else if (reason === "resignation") {
     message = isWinner ? "Вы победили! Оппонент сдался" : "Вы проиграли!";
   }
-  const isGameAvailable = !!game;
+  const isGameAvailable = !!game && !gameState?.startsWith("online");
   const titleGameOver =
     message.length !== 0
       ? message
@@ -61,7 +67,16 @@ export default function GameOverModal({
           </button>
         )}
 
-        <button onClick={() => setGameState("menu")}>В меню</button>
+        <button
+          onClick={() => {
+            if (gameState?.startsWith("online") && gameId && resign) {
+              resign(gameId);
+            }
+            setGameState("menu");
+          }}
+        >
+          В меню
+        </button>
       </div>
     </div>
   );

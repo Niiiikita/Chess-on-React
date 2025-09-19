@@ -290,7 +290,10 @@ export function OnlineGameScreen({
         <LazyGameOverModal
           reason={gameOverReason.reason}
           winner={gameOverReason.winner}
+          resign={resignGame}
           userId={userId}
+          gameId={gameId}
+          gameState={gameState}
           setGameState={setGameState}
         />
       </Suspense>

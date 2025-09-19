@@ -1,9 +1,10 @@
-import type { GameModeType, PieceType } from "../../utils/typeBoard/types";
+import type { GameModeType } from "../../utils/typeBoard/types";
 import Button from "../Button/Button";
 import { useChessGame } from "@/hooks/useChessGame";
 import { makeAIMove } from "@/utils/makeAIMove/makeAIMove";
 import styles from "./PopupChoosingFigure.module.css";
 import pieceIconCache from "@/utils/pieceIconCache/pieceIconCache";
+import { coordsToSquare } from "@/utils/coordsToSquare/coordsToSquare";
 
 const pieceToRussian: Record<
   "queen" | "rook" | "bishop" | "knight" | "pawn" | "king",
@@ -17,67 +18,112 @@ const pieceToRussian: Record<
   king: "Король",
 };
 
-export default function PopupChoosingFigure(
-  context: ReturnType<typeof useChessGame> & { gameState: GameModeType }
-) {
+type PopupChoosingFigureProps = {
+  game: ReturnType<typeof useChessGame>;
+  gameState: GameModeType;
+  gameId?: string;
+  transmissionMove?: (
+    from: string,
+    to: string,
+    gameId: string,
+    promotion?: "q" | "r" | "b" | "n"
+  ) => void;
+};
+
+export default function PopupChoosingFigure({
+  game,
+  gameState,
+  gameId,
+  transmissionMove,
+}: PopupChoosingFigureProps) {
   const {
-    gameState,
     promotion,
     board,
     setBoard,
     setPromotion,
-    setLastMove,
-    setSelectedFrom,
-    setPossibleMove,
     currentPlayer,
     setCurrentPlayer,
-  } = context;
+  } = game;
+
+  const pieceSymbolMap: Record<
+    "queen" | "rook" | "bishop" | "knight",
+    "q" | "r" | "b" | "n"
+  > = {
+    queen: "q",
+    rook: "r",
+    bishop: "b",
+    knight: "n",
+  };
 
   // Убедимся, что promotion существует
-  if (!promotion) return null; // или показываем заглушку
+  // if (!promotion || !lastMove) return null;
 
   return (
     <div className={styles.promotionModal}>
       <h2>Выберите фигуру</h2>
       <div className={styles.promotionOptions}>
         {(["queen", "rook", "bishop", "knight"] as const).map((figure) => {
-          const Icon = pieceIconCache[`${figure}_${promotion.color}`];
+          const Icon = pieceIconCache[`${figure}_${promotion?.color}`];
 
           return (
             <Button
               className={styles.promotionButton}
               key={figure}
               onClick={() => {
-                const newPiece: PieceType = {
+                if (!promotion) return null;
+
+                const chessPromotion = pieceSymbolMap[figure];
+
+                // ✅ БЕРЕМ КООРДИНАТЫ ИЗ lastMove — ОНИ УЖЕ УСТАНОВЛЕНЫ makeMove
+                const fromSquare = coordsToSquare(
+                  promotion.fromRow,
+                  promotion.fromCol
+                );
+                const toSquare = coordsToSquare(
+                  promotion.toRow,
+                  promotion.toCol
+                );
+
+                console.log(
+                  "[PopupChoosingFigure] Исходная позиция:",
+                  fromSquare
+                );
+                console.log(
+                  "[PopupChoosingFigure] Цель превращения:",
+                  toSquare
+                );
+
+                // ✅ ✅ ✅ ОТПРАВЛЯЕМ ХОД С PROMOTION — ЭТО ОКОНЧАТЕЛЬНЫЙ ХОД!
+                if (gameId && transmissionMove) {
+                  transmissionMove(
+                    fromSquare,
+                    toSquare,
+                    gameId,
+                    chessPromotion
+                  );
+                }
+
+                // ✅ ОБНОВЛЯЕМ ДОСКУ — СТАВИМ НОВУЮ ФИГУРУ
+                const updatedBoard = board.map((row) => [...row]);
+                updatedBoard[promotion.toRow][promotion.toCol] = {
                   type: figure,
                   color: promotion.color,
                 };
-
-                const updatedBoard = board.map((row) => [...row]);
-                updatedBoard[promotion.row][promotion.col] = newPiece;
-
                 setBoard(updatedBoard);
-                setLastMove({
-                  from: [promotion.row, promotion.col],
-                  to: [promotion.row, promotion.col],
-                  piece: newPiece,
-                });
-                setSelectedFrom(null);
-                setPossibleMove([]);
-                setPromotion(null);
 
+                setPromotion(null);
                 setCurrentPlayer(currentPlayer === "white" ? "black" : "white");
 
-                if (gameState === "vs-ai" && newPiece.color === "white") {
+                if (gameState === "vs-ai" && promotion.color === "white") {
                   setTimeout(() => {
                     makeAIMove({
-                      ...context,
+                      ...game,
                       board: updatedBoard,
                       currentPlayer: "black",
                       lastMove: {
-                        from: [promotion.row, promotion.col],
-                        to: [promotion.row, promotion.col],
-                        piece: newPiece,
+                        from: [promotion.fromRow, promotion.fromCol],
+                        to: [promotion.toRow, promotion.toCol],
+                        piece: { type: figure, color: promotion.color },
                       },
                       gameState: "vs-ai" as const,
                     });

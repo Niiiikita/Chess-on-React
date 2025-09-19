@@ -31,7 +31,7 @@ export default function Board({
     promotion?: "q" | "r" | "b" | "n"
   ) => void;
   gameId?: string | null;
-  resign?: (gameId: string) => void; // ← ТИП
+  resign?: (gameId: string) => void;
   game: ReturnType<typeof useChessGame>;
 }) {
   const {
@@ -71,10 +71,10 @@ export default function Board({
   const handleSquareClick = (e: React.MouseEvent, row: number, col: number) => {
     const piece = board[row][col];
     handleClickPiece(e, piece, row, col, {
-      ...game,
-      gameState,
-      gameId,
-      transmissionMove,
+      ...game, // ← ВСЁ, ЧТО ЕСТЬ
+      gameState, // ← ДОБАВЛЯЕМ gameState
+      gameId, // ← ДОБАВЛЯЕМ gameId
+      transmissionMove, // ← ДОБАВЛЯЕМ transmissionMove
     });
   };
 
@@ -181,8 +181,10 @@ export default function Board({
       {promotion && (
         <Suspense fallback={null}>
           <LazyPopupChoosingFigure
-            {...game}
+            game={game}
             gameState={gameState}
+            gameId={gameId ?? undefined}
+            transmissionMove={transmissionMove}
           />
         </Suspense>
       )}
@@ -216,7 +218,10 @@ export default function Board({
         <Suspense fallback={null}>
           <LazyGameOverModal
             game={game}
+            gameId={gameId}
+            gameState={gameState}
             setGameState={setGameState}
+            resign={resign}
           />
         </Suspense>
       )}

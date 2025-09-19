@@ -30,8 +30,10 @@ export function makeMove(
     setHasRookMoved,
     currentPlayer,
     setCurrentPlayer,
-    gameState,
     setCapturedPieces,
+    gameState, // ← БЕРЕМ ИЗ CONTEXT
+    gameId, // ← БЕРЕМ ИЗ CONTEXT
+    transmissionMove, // ← БЕРЕМ ИЗ CONTEXT
   } = context;
 
   const newBoard = board.map((row) => [...row]);
@@ -43,8 +45,10 @@ export function makeMove(
     setBoard(newBoard);
 
     setPromotion({
-      row: to.row,
-      col: to.col,
+      fromRow: from.row,
+      fromCol: from.col,
+      toRow: to.row,
+      toCol: to.col,
       color: piece.color,
     });
 
@@ -138,5 +142,18 @@ export function makeMove(
         gameState: "vs-ai",
       });
     }, 600);
+  }
+
+  // ✅ ✅ ✅ КЛЮЧЕВОЙ ШАГ: ОТПРАВКА ХОДА НА СЕРВЕР — ЕСЛИ ЭТО ОНЛАЙН И НЕ ПРЕВРАЩЕНИЕ
+  if (
+    gameState?.startsWith("online-") &&
+    gameId &&
+    transmissionMove &&
+    !(piece?.type === "pawn" && (to.row === 0 || to.row === 7))
+  ) {
+    const fromSquare = `${String.fromCharCode(97 + from.col)}${8 - from.row}`;
+    const toSquare = `${String.fromCharCode(97 + to.col)}${8 - to.row}`;
+
+    transmissionMove(fromSquare, toSquare, gameId);
   }
 }

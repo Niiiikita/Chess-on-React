@@ -65,8 +65,10 @@ export type LastMoveType = {
 } | null;
 
 export type PromotionType = {
-  row: number;
-  col: number;
+  fromRow: number;
+  fromCol: number;
+  toRow: number;
+  toCol: number;
   color: "white" | "black";
 } | null;
 

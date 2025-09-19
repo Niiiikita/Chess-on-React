@@ -12,7 +12,12 @@ export function handleClickPiece(
   context: ReturnType<typeof useChessGame> & {
     gameState: GameModeType;
     gameId?: string | null;
-    transmissionMove?: (from: string, to: string, gameId?: string) => void;
+    transmissionMove?: (
+      from: string,
+      to: string,
+      gameId?: string,
+      promotion?: "q" | "r" | "b" | "n"
+    ) => void;
   }
 ) {
   // Получаем контекст
@@ -27,9 +32,6 @@ export function handleClickPiece(
     hasRookMoved,
     currentPlayer,
     setHintWithTimer,
-    gameState,
-    gameId,
-    transmissionMove,
   } = context;
 
   e.preventDefault();
@@ -40,21 +42,15 @@ export function handleClickPiece(
 
     // Проверяем, можно ли сюда пойти
     if (possibleMove.includes(currentSquare)) {
-      // ✅ ВСЕГДА отправляем ход на сервер, если онлайн
-      if (gameState?.startsWith("online-") && gameId) {
-        const fromSquare = coordsToSquare(selectedFrom.row, selectedFrom.col);
-        const toSquare = coordsToSquare(rowIdx, colIdx);
-        transmissionMove?.(fromSquare, toSquare, gameId);
+      // ✅ ВСЕГДА вызываем makeMove — он знает всё: превращение, взятие на проходе, рокировку
+      makeMove(
+        { row: selectedFrom.row, col: selectedFrom.col },
+        { row: rowIdx, col: colIdx },
+        { ...context }
+      );
 
-        // ❌ НЕ ВЫЗЫВАЕМ makeMove() — это сделает сервер!
-        // makeMove(selectedFrom, { row: rowIdx, col: colIdx }, { ...context }); ← УБРАЛИ!
-      } else {
-        // ✅ А если локальный режим — вызываем как обычно
-        makeMove(selectedFrom, { row: rowIdx, col: colIdx }, { ...context });
-      }
-
-      setPossibleMove([]);
       setSelectedFrom(null);
+      setPossibleMove([]);
       return;
     }
   }
@@ -73,6 +69,7 @@ export function handleClickPiece(
         hasRookMoved
       );
       setPossibleMove(moves);
+
       setSelectedFrom({ row: rowIdx, col: colIdx });
     }
   }

@@ -36,4 +36,12 @@ export type ChessGameState = {
   setCapturedPieces: React.Dispatch<React.SetStateAction<CapturedPiecesType>>;
   highlightedSquare: string | null;
   setHighlightedSquare: React.Dispatch<React.SetStateAction<string | null>>;
+  // ✅ Добавленные поля:
+  gameId?: string | null;
+  transmissionMove?: (
+    from: string,
+    to: string,
+    gameId?: string,
+    promotion?: "q" | "r" | "b" | "n"
+  ) => void;
 };
