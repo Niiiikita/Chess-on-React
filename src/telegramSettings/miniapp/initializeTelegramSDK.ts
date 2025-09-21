@@ -30,17 +30,20 @@ const initializeTelegramSDK = async () => {
       }
     }
 
-    //
     if (viewport.expand.isAvailable()) {
       await viewport.mount();
       viewport.expand();
     }
 
-    // Добавляем лог с задержкой, чтобы eruda успел инициализироваться
-    setTimeout(() => {
-      console.log("✅ MiniApp готово к использованию");
-      console.log(miniApp.isMounted());
-    }, 1000);
+    // ✅ ✅ ✅ КЛЮЧЕВОЙ ШАГ: ПРОВЕРЯЕМ SETTINGS И ПОДКЛЮЧАЕМ FULLSCREEN
+    const savedSettings = localStorage.getItem("chess-settings");
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      if (settings.fullscreen && viewport.requestFullscreen.isAvailable()) {
+        viewport.requestFullscreen().catch(console.error);
+        console.log("✅ Fullscreen включён при запуске (из localStorage)");
+      }
+    }
   } catch (error) {
     console.error("Ошибка инициализации SDK Telegram", error);
   }

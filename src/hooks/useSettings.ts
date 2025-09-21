@@ -11,7 +11,7 @@ export function useSettings() {
           highlightMoves: true,
           animations: true,
           sound: true,
-          fullscreen: true,
+          fullscreen: false,
         };
   });
 
