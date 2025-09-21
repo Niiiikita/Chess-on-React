@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { useChessGame } from "@/hooks/useChessGame";
-import { usePieceDrag } from "@/hooks/usePieceDrag";
 import { LazyPopupChoosingFigure } from "../PopupChoosingFigure/PopupChoosingFigure.lazy";
 import { LazyGameOverModal } from "../GameOver/GameOverModal.lazy";
 import Square from "../Square/Square";
@@ -8,9 +7,6 @@ import Hint from "../Hint/Hint";
 import CurrentPlayerComponent from "../CurrentPlayerComponent/CurrentPlayerComponent";
 import type { GameModeType } from "@/utils/typeBoard/types";
 import { resetGame } from "@/utils/resetGame/resetGame";
-import handlePieceMove from "@/utils/logicChess/handlePieceMove";
-import { coordsToSquare } from "@/utils/coordsToSquare/coordsToSquare";
-import { handlePieceEnter } from "@/utils/logicChess/handlePieceEnter";
 import { handleClickPiece } from "@/utils/logicChess/handleClickPiece";
 import styles from "./Board.module.css";
 
@@ -55,18 +51,7 @@ export default function Board({
     setHasRookMoved,
     capturedPieces,
     setCapturedPieces,
-    setHighlightedSquare,
   } = game;
-
-  // Кастомный хук для перетаскивания фигуры
-  const { handleDragStart } = usePieceDrag({
-    board: game.board,
-    lastMove: game.lastMove,
-    hasKingMoved: game.hasKingMoved,
-    hasRookMoved: game.hasRookMoved,
-    currentPlayer: game.currentPlayer,
-    setPossibleMove: game.setPossibleMove,
-  });
 
   // 🚀 ДЕЛЕГИРУЕМ СОБЫТИЯ ИЗ Square В Board
   const handleSquareClick = (e: React.MouseEvent, row: number, col: number) => {
@@ -77,49 +62,6 @@ export default function Board({
       gameId, // ← ДОБАВЛЯЕМ gameId
       transmissionMove, // ← ДОБАВЛЯЕМ transmissionMove
     });
-  };
-
-  const handleSquareDragStart = (
-    e: React.DragEvent,
-    row: number,
-    col: number
-  ) => {
-    handleDragStart(e, row, col);
-  };
-
-  const handleSquareDragEnter = (
-    e: React.DragEvent,
-    row: number,
-    col: number
-  ) => {
-    handlePieceEnter(
-      e,
-      row,
-      col,
-      possibleMove,
-      currentPlayer,
-      setHighlightedSquare
-    );
-  };
-
-  const handleSquareDragLeave = () => {
-    setHighlightedSquare(null);
-  };
-
-  const handleSquareDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleSquareDrop = (e: React.DragEvent, row: number, col: number) => {
-    const fromSquare = game.selectedFrom
-      ? coordsToSquare(game.selectedFrom.row, game.selectedFrom.col)
-      : null;
-
-    if (!fromSquare) return;
-
-    handlePieceMove(e, row, col, { ...game, gameState });
-
-    setHighlightedSquare(null);
   };
 
   return (
@@ -151,13 +93,7 @@ export default function Board({
                   isLastMoveTo={!!isLastMoveTo}
                   possibleMove={possibleMove}
                   gameState={gameState}
-                  onDragStart={handleSquareDragStart}
-                  onDragEnter={(e) => handleSquareDragEnter(e, rowIdx, colIdx)}
-                  onDragLeave={handleSquareDragLeave}
-                  onDragOver={handleSquareDragOver}
-                  onDrop={(e) => handleSquareDrop(e, rowIdx, colIdx)}
                   onClick={(e) => handleSquareClick(e, rowIdx, colIdx)}
-                  transmissionMove={transmissionMove}
                   gameId={gameId}
                 />
               );

@@ -8,12 +8,10 @@ export default memo(function Piece({
   piece,
   isLastMoveFrom,
   isLastMoveTo,
-  onDragStart,
 }: {
   piece: PieceType;
   isLastMoveFrom: boolean;
   isLastMoveTo: boolean;
-  onDragStart: (e: React.DragEvent) => void;
 }) {
   if (!piece) return null;
 
@@ -25,8 +23,6 @@ export default memo(function Piece({
         styles.piece,
         (isLastMoveFrom || isLastMoveTo) && styles.pieceAnimating
       )}
-      onDragStart={onDragStart}
-      draggable
     >
       <Icon style={{ width: "100%", height: "100%" }} />
     </div>

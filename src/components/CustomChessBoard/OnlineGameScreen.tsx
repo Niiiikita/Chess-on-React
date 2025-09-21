@@ -190,7 +190,12 @@ export function OnlineGameScreen({
     const handler = (data: {
       fen: string;
       turn: "white" | "black";
-      lastMove: { from: string; to: string } | null;
+      lastMove: {
+        from: string;
+        to: string;
+        pieceType: string;
+        doublePawnMove?: boolean;
+      } | null;
       capturedPieces: { white: string[]; black: string[] };
       gameOver: boolean;
       result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";
@@ -198,20 +203,15 @@ export function OnlineGameScreen({
       console.log("[OnlineGameScreen] Ход оппонента получен", data);
 
       const newBoard = fenToBoard(data.fen);
-      const newLastMove = data.lastMove
-        ? {
-            from: [
-              8 - parseInt(data.lastMove.from[1]), // ← ИСПРАВЛЕНО: from[1], а не to[1]
-              data.lastMove.from.charCodeAt(0) - "a".charCodeAt(0),
-            ] as [number, number], // ← Явное приведение к кортежу
-            to: [
-              8 - parseInt(data.lastMove.to[1]), // ← ИСПРАВЛЕНО: to[1]
-              data.lastMove.to.charCodeAt(0) - "a".charCodeAt(0),
-            ] as [number, number], // ← Явное приведение
-            piece: null,
-          }
-        : null;
 
+      // ✅ ПРОВЕРКА: ЭТО ХОД СОПЕРНИКА? (ЕСЛИ НЕ ВАШ)
+      const isOpponentMove = data.turn !== game.currentPlayer;
+
+      // ✅ ОБНОВЛЯЕМ ДОСКУ ВСЕГДА
+      game.setBoard(newBoard);
+      game.setCurrentPlayer(data.turn);
+
+      // ✅ ОБНОВЛЯЕМ capturedPieces ВСЕГДА
       const convertCapturedPiece = (symbol: string): PieceType => {
         const color = symbol === symbol.toUpperCase() ? "white" : "black";
         const typeMap: Record<string, PieceData["type"]> = {
@@ -227,20 +227,64 @@ export function OnlineGameScreen({
         return { type, color };
       };
 
-      game.setBoard(newBoard);
-      game.setCurrentPlayer(data.turn);
-      game.setLastMove(newLastMove);
+      const convertPieceToPieceType = (
+        symbol: string,
+        color: "white" | "black"
+      ): PieceType => {
+        const typeMap: Record<string, PieceData["type"]> = {
+          p: "pawn",
+          r: "rook",
+          n: "knight",
+          b: "bishop",
+          q: "queen",
+          k: "king",
+        };
+        const type = typeMap[symbol.toLowerCase()];
+        if (!type) throw new Error(`Недопустимый тип фигуры: ${symbol}`);
+        return { type, color };
+      };
+
       game.setCapturedPieces({
         white: data.capturedPieces.white.map(convertCapturedPiece),
         black: data.capturedPieces.black.map(convertCapturedPiece),
       });
 
+      // ✅ ОБНОВЛЯЕМ gameOver
       if (
         data.gameOver &&
         (data.result === "checkmate" || data.result === "stalemate")
       ) {
         game.setGameOver(data.result);
       }
+
+      // ✅ ✅ ✅ ТОЛЬКО ЕСЛИ ЭТО ХОД СОПЕРНИКА — ОБНОВЛЯЕМ lastMove!
+      if (isOpponentMove && data.lastMove) {
+        const pieceColor =
+          data.lastMove.pieceType === data.lastMove.pieceType.toUpperCase()
+            ? "white"
+            : "black";
+
+        const newLastMove = {
+          from: [
+            8 - parseInt(data.lastMove.from[1]),
+            data.lastMove.from.charCodeAt(0) - 97,
+          ] as [number, number],
+          to: [
+            8 - parseInt(data.lastMove.to[1]),
+            data.lastMove.to.charCodeAt(0) - 97,
+          ] as [number, number],
+          piece: convertPieceToPieceType(data.lastMove.pieceType, pieceColor),
+          doublePawnMove: data.lastMove.doublePawnMove || false,
+        };
+
+        console.log(
+          "📡 Получен ход соперника, устанавливаем lastMove:",
+          newLastMove
+        );
+        game.setLastMove(newLastMove); // ← ← ← ТОЛЬКО ЗДЕСЬ!
+      }
+
+      // ✅ Если это ваш ход — НЕ трогаем lastMove! Он уже обновлён локально.
     };
 
     const cleanup = onMoveMade(handler);

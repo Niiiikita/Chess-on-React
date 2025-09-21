@@ -1,14 +1,6 @@
 import { coordsToSquare } from "../coordsToSquare/coordsToSquare";
 import type { PieceType } from "../typeBoard/types";
 
-/**
- *  @param piece - фигура, которую нужно переместить
- *  @param row - текущая позиция фигуры по горизонтали
- *  @param col - текущая позиция фигуры по вертикали
- *  @param board - доска, на которой находится фигура
- *  @param direction - направление движения фигуры (Движение наверх, если dRow = -1, вниз, если dRow = 1, влево, если dCol = -1, вправо, если dCol = 1)
- *  @returns массив возможных ходов фигуры
- */
 export function canMovePiece(
   piece: PieceType,
   row: number,

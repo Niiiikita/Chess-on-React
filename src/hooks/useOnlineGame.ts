@@ -65,10 +65,15 @@ export function useOnlineGame() {
       gameId: id,
       from,
       to,
-      promotion, // ← ✅ ПЕРЕДАЁМ ЕГО!
+      promotion,
     });
 
-    socketRef.current?.emit("makeMove", { gameId: id, from, to, promotion });
+    socketRef.current?.emit("makeMove", {
+      gameId: id,
+      from,
+      to,
+      promotion,
+    });
   };
 
   const resignGame = (gameId: string) => {
@@ -80,7 +85,7 @@ export function useOnlineGame() {
     callback: (data: {
       fen: string;
       turn: "white" | "black";
-      lastMove: { from: string; to: string } | null;
+      lastMove: { from: string; to: string; pieceType: string } | null;
       capturedPieces: { white: string[]; black: string[] };
       gameOver: boolean;
       result: "ongoing" | "checkmate" | "stalemate" | "draw" | "resignation";

@@ -31,9 +31,9 @@ export function makeMove(
     currentPlayer,
     setCurrentPlayer,
     setCapturedPieces,
-    gameState, // ← БЕРЕМ ИЗ CONTEXT
-    gameId, // ← БЕРЕМ ИЗ CONTEXT
-    transmissionMove, // ← БЕРЕМ ИЗ CONTEXT
+    gameState,
+    gameId,
+    transmissionMove,
   } = context;
 
   const newBoard = board.map((row) => [...row]);

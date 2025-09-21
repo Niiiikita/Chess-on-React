@@ -62,6 +62,7 @@ export type LastMoveType = {
   from: [number, number];
   to: [number, number];
   piece: PieceType;
+  doublePawnMove?: boolean;
 } | null;
 
 export type PromotionType = {

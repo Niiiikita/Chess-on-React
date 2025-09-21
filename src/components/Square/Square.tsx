@@ -14,18 +14,8 @@ type SquareProps = {
   isLastMoveTo: boolean;
   possibleMove: string[];
   gameState: GameModeType;
-  onDragStart: (e: React.DragEvent, row: number, col: number) => void;
-  onDragEnter: (e: React.DragEvent) => void;
-  onDragLeave: () => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
   onClick: (e: React.MouseEvent) => void;
-  transmissionMove?: (
-    from: string,
-    to: string,
-    gameId?: string,
-    promotion?: "q" | "r" | "b" | "n"
-  ) => void;
+
   gameId?: string | null;
 };
 
@@ -37,11 +27,6 @@ export default memo(function Square({
   isLastMoveFrom,
   isLastMoveTo,
   possibleMove,
-  onDragStart,
-  onDragEnter,
-  onDragLeave,
-  onDragOver,
-  onDrop,
   onClick,
 }: SquareProps) {
   const squareColor = isLight ? "#f0d9b5" : "#b58863";
@@ -56,12 +41,7 @@ export default memo(function Square({
         isLastMoveTo && styles.lastMoveTo
       )}
       style={{ backgroundColor: squareColor }}
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
       onClick={onClick}
-      onDragStart={(e) => onDragStart(e, rowIdx, colIdx)}
     >
       {/* Подсветка возможного хода */}
       {possibleMove.includes(currentSquare) && <div className={styles.move} />}
@@ -72,7 +52,6 @@ export default memo(function Square({
           piece={piece}
           isLastMoveFrom={isLastMoveFrom}
           isLastMoveTo={isLastMoveTo}
-          onDragStart={(e) => onDragStart(e, rowIdx, colIdx)}
         />
       )}
     </div>
