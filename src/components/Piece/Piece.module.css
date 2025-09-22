@@ -2,6 +2,6 @@
   font-size: clamp(24px, 5vw, 40px);
   user-select: none;
   pointer-events: all;
-  width: clamp(24px, 5vw, 50px);
+  width: clamp(24px, 4vw, 50px);
   height: clamp(24px, 5vw, 50px);
 }

@@ -4,6 +4,7 @@ import { coordsToSquare } from "@/utils/coordsToSquare/coordsToSquare";
 import { GameModeType, PieceType } from "@/utils/typeBoard/types";
 import clsx from "clsx";
 import styles from "./Square.module.css";
+import { useSettings } from "@/hooks/useSettings";
 
 type SquareProps = {
   piece: PieceType | null;
@@ -32,6 +33,8 @@ export default memo(function Square({
   const squareColor = isLight ? "#f0d9b5" : "#b58863";
   const currentSquare = coordsToSquare(rowIdx, colIdx);
 
+  const { settings } = useSettings();
+
   return (
     <div
       key={`${rowIdx}-${colIdx}`}
@@ -44,7 +47,9 @@ export default memo(function Square({
       onClick={onClick}
     >
       {/* Подсветка возможного хода */}
-      {possibleMove.includes(currentSquare) && <div className={styles.move} />}
+      {settings.highlightMoves && possibleMove.includes(currentSquare) && (
+        <div className={styles.move} />
+      )}
 
       {/* Фигура */}
       {piece && (

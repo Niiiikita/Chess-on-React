@@ -7,11 +7,11 @@ export function useSettings() {
     return saved
       ? JSON.parse(saved)
       : {
-          theme: "light",
+          theme: "dark",
           highlightMoves: true,
-          animations: true,
-          sound: true,
-          fullscreen: true,
+          animations: false,
+          sound: false,
+          fullscreen: false,
         };
   });
 

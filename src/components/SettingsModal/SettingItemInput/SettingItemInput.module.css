@@ -5,6 +5,11 @@
   gap: 15px;
 }
 
+.settingItem span {
+  font-size: clamp(14px, 2vw, 24px);
+  text-align: start;
+}
+
 .flipswitch {
   position: relative;
   /* width: 86px; */
