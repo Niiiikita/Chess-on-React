@@ -354,7 +354,6 @@ export function OnlineGameScreen({
       setGameState={setGameState}
       transmissionMove={transmissionMove}
       gameId={gameId}
-      game={game}
       resign={resignGame}
     />
   );
