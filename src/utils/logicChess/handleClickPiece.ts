@@ -1,6 +1,6 @@
 import { useChessGame } from "@/hooks/useChessGame";
 import { coordsToSquare } from "../coordsToSquare/coordsToSquare";
-import type { GameModeType, PieceType } from "../typeBoard/types";
+import type { GameModeType, PieceType, Settings } from "../typeBoard/types";
 import { getLegalMoves } from "./getLegalMoves";
 import { makeMove } from "./makeMove";
 
@@ -10,6 +10,7 @@ export function handleClickPiece(
   rowIdx: number,
   colIdx: number,
   context: ReturnType<typeof useChessGame> & {
+    settings: Settings;
     gameState: GameModeType;
     gameId?: string | null;
     transmissionMove?: (
@@ -18,6 +19,16 @@ export function handleClickPiece(
       gameId?: string,
       promotion?: "q" | "r" | "b" | "n"
     ) => void;
+    setMovingPiece?: (
+      movingPiece: {
+        piece: PieceType;
+        fromRow: number;
+        fromCol: number;
+        toRow: number;
+        toCol: number;
+      } | null
+    ) => void;
+    boardRef?: React.RefObject<HTMLDivElement | null>;
   }
 ) {
   // Получаем контекст
@@ -33,30 +44,63 @@ export function handleClickPiece(
     currentPlayer,
     myColor,
     setHintWithTimer,
+    settings,
   } = context;
 
   e.preventDefault();
 
   const currentSquare = coordsToSquare(rowIdx, colIdx);
 
-  // ✅ ШАГ 1: ЕСЛИ УЖЕ ВЫБРАНА ФИГУРА — ПРОВЕРЯЕМ, МОЖНО ЛИ СЮДА ПОЙТИ
+  //  ШАГ 1: ЕСЛИ УЖЕ ВЫБРАНА ФИГУРА — ПРОВЕРЯЕМ, МОЖНО ЛИ СЮДА ПОЙТИ
   if (selectedFrom !== null) {
+    console.log("[handleClickPiece] Уже выбрана фигура:", selectedFrom);
     if (possibleMove.includes(currentSquare)) {
-      makeMove(
-        { row: selectedFrom.row, col: selectedFrom.col },
-        { row: rowIdx, col: colIdx },
-        { ...context }
-      );
+      console.log("[handleClickPiece] Возможный ход на:", currentSquare);
+
+      // Запускаем анимацию перед обновлением состояния
+      if (settings.animations && context.setMovingPiece) {
+        console.log("[handleClickPiece] Запуск анимации");
+        context.setMovingPiece({
+          piece: board[selectedFrom.row][selectedFrom.col],
+          fromRow: selectedFrom.row,
+          fromCol: selectedFrom.col,
+          toRow: rowIdx,
+          toCol: colIdx,
+        });
+
+        // Задерживаем обновление состояния до завершения анимации
+        setTimeout(() => {
+          console.log("[handleClickPiece] Обновление состояния после анимации");
+          makeMove(
+            { row: selectedFrom.row, col: selectedFrom.col },
+            { row: rowIdx, col: colIdx },
+            { ...context }
+          );
+        }, 300); // Длительность анимации
+      } else {
+        console.log(
+          "[handleClickPiece] Анимация не поддерживается, обновляем состояние сразу"
+        );
+        // Если анимация не поддерживается, обновляем состояние сразу
+        makeMove(
+          { row: selectedFrom.row, col: selectedFrom.col },
+          { row: rowIdx, col: colIdx },
+          { ...context }
+        );
+      }
+
       setSelectedFrom(null);
       setPossibleMove([]);
       setHintWithTimer(null);
       return;
     }
 
-    // ❌ Не цель — но может, кликнули на другую свою фигуру?
+    // Не цель — но может, кликнули на другую свою фигуру?
     if (piece && piece.color === currentPlayer) {
+      console.log("[handleClickPiece] Клик на другую свою фигуру");
       // Продолжим к шагу 4
     } else {
+      console.log("[handleClickPiece] Сброс выбора фигуры");
       setSelectedFrom(null);
       setPossibleMove([]);
       setHintWithTimer(null);
@@ -64,7 +108,7 @@ export function handleClickPiece(
     }
   }
 
-  // ✅ ШАГ 2: КЛИК НА ПУСТУЮ КЛЕТКУ — СБРАСЫВАЕМ
+  // ШАГ 2: КЛИК НА ПУСТУЮ КЛЕТКУ — СБРАСЫВАЕМ
   if (!piece) {
     setSelectedFrom(null);
     setPossibleMove([]);
@@ -72,10 +116,9 @@ export function handleClickPiece(
     return;
   }
 
-  // ✅ ШАГ 3: ПРОВЕРКА — ЭТО НЕ МОЙ ХОД? (ОНЛАЙН)
+  // ШАГ 3: ПРОВЕРКА — ЭТО НЕ МОЙ ХОД? (ОНЛАЙН)
   if (context.gameState.startsWith("online")) {
     if (currentPlayer !== myColor) {
-      // ❌ Не ваш ход — нельзя ничего делать
       setSelectedFrom(null);
       setPossibleMove([]);
       setHintWithTimer(
@@ -84,7 +127,7 @@ export function handleClickPiece(
       return;
     }
 
-    // ✅ Ваш ход — но можно только свою фигуру
+    // Ваш ход — но можно только свою фигуру
     if (piece.color !== myColor) {
       setSelectedFrom(null);
       setPossibleMove([]);
@@ -93,7 +136,7 @@ export function handleClickPiece(
     }
   }
 
-  // ✅ ШАГ 4: ПРОВЕРКА — ЛОКАЛЬНЫЕ РЕЖИМЫ (local / vs-ai)
+  // ШАГ 4: ПРОВЕРКА — ЛОКАЛЬНЫЕ РЕЖИМЫ (local / vs-ai)
   if (context.gameState === "local" || context.gameState === "vs-ai") {
     if (piece.color !== currentPlayer) {
       setSelectedFrom(null);
@@ -105,7 +148,7 @@ export function handleClickPiece(
     }
   }
 
-  // ✅ ШАГ 5: КЛИК НА СВОЮ ФИГУРУ — ПОКАЗЫВАЕМ ХОДЫ
+  // ШАГ 5: КЛИК НА СВОЮ ФИГУРУ — ПОКАЗЫВАЕМ ХОДЫ
   if (
     (context.gameState.startsWith("online") && piece.color === myColor) ||
     ((context.gameState === "local" || context.gameState === "vs-ai") &&
@@ -138,7 +181,7 @@ export function handleClickPiece(
     return;
   }
 
-  // ✅ ШАГ 6: КЛИК НА ЧУЖУЮ ФИГУРУ — ПРОВЕРЯЕМ, МОЖНО ЛИ ТУДА ПОЙТИ
+  // ШАГ 6: КЛИК НА ЧУЖУЮ ФИГУРУ — ПРОВЕРЯЕМ, МОЖНО ЛИ ТУДА ПОЙТИ
   if (
     (context.gameState.startsWith("online") && piece.color !== myColor) ||
     ((context.gameState === "local" || context.gameState === "vs-ai") &&
@@ -164,7 +207,7 @@ export function handleClickPiece(
     return;
   }
 
-  // ✅ Защита
+  // Защита
   setSelectedFrom(null);
   setPossibleMove([]);
   setHintWithTimer(null);

@@ -9,7 +9,7 @@ export function useSettings() {
       : {
           theme: "dark",
           highlightMoves: true,
-          animations: false,
+          animations: true,
           sound: false,
           fullscreen: false,
         };

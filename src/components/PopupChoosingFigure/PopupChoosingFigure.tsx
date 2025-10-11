@@ -55,9 +55,6 @@ export default function PopupChoosingFigure({
     knight: "n",
   };
 
-  // Убедимся, что promotion существует
-  // if (!promotion || !lastMove) return null;
-
   return (
     <div className={styles.promotionModal}>
       <h2>Выберите фигуру</h2>
@@ -74,7 +71,7 @@ export default function PopupChoosingFigure({
 
                 const chessPromotion = pieceSymbolMap[figure];
 
-                // ✅ БЕРЕМ КООРДИНАТЫ ИЗ lastMove — ОНИ УЖЕ УСТАНОВЛЕНЫ makeMove
+                // БЕРЕМ КООРДИНАТЫ ИЗ lastMove — ОНИ УЖЕ УСТАНОВЛЕНЫ makeMove
                 const fromSquare = coordsToSquare(
                   promotion.fromRow,
                   promotion.fromCol
@@ -93,7 +90,7 @@ export default function PopupChoosingFigure({
                   toSquare
                 );
 
-                // ✅ ✅ ✅ ОТПРАВЛЯЕМ ХОД С PROMOTION — ЭТО ОКОНЧАТЕЛЬНЫЙ ХОД!
+                // ОТПРАВЛЯЕМ ХОД С PROMOTION — ЭТО ОКОНЧАТЕЛЬНЫЙ ХОД!
                 if (gameId && transmissionMove) {
                   transmissionMove(
                     fromSquare,
@@ -103,7 +100,7 @@ export default function PopupChoosingFigure({
                   );
                 }
 
-                // ✅ ОБНОВЛЯЕМ ДОСКУ — СТАВИМ НОВУЮ ФИГУРУ
+                // ОБНОВЛЯЕМ ДОСКУ — СТАВИМ НОВУЮ ФИГУРУ
                 const updatedBoard = board.map((row) => [...row]);
                 updatedBoard[promotion.toRow][promotion.toCol] = {
                   type: figure,

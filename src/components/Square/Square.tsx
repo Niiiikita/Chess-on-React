@@ -16,7 +16,6 @@ type SquareProps = {
   possibleMove: string[];
   gameState: GameModeType;
   onClick: (e: React.MouseEvent) => void;
-
   gameId?: string | null;
 };
 
@@ -37,7 +36,6 @@ export default memo(function Square({
 
   return (
     <div
-      key={`${rowIdx}-${colIdx}`}
       className={clsx(
         styles.square,
         isLastMoveFrom && styles.lastMoveFrom,

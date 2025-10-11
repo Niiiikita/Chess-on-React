@@ -5,13 +5,17 @@
   align-items: center;
   user-select: none;
   transition: background-color 0.2s ease-in;
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .square:hover:has(div) {
   /* background-color: #62cf54 !important; */
   outline: 5px solid #62cf54;
   outline-offset: -10px;
-  filter: brightness(1.2) saturate(1.3);
+  /* filter: brightness(1.2) saturate(1.3); */
   cursor: pointer;
   transition: background-color 0.1s ease-in;
 }
@@ -34,6 +38,7 @@
   pointer-events: none;
   opacity: 0.6;
   /* transition: opacity 0.2s ease-in; */
+  z-index: 20;
 }
 
 .lastMoveFrom::before {

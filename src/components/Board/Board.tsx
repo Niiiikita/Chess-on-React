@@ -1,14 +1,16 @@
-import { Suspense } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useChessGame } from "@/hooks/useChessGame";
 import { LazyPopupChoosingFigure } from "../PopupChoosingFigure/PopupChoosingFigure.lazy";
 import { LazyGameOverModal } from "../GameOver/GameOverModal.lazy";
 import Square from "../Square/Square";
 import Hint from "../Hint/Hint";
 import CurrentPlayerComponent from "../CurrentPlayerComponent/CurrentPlayerComponent";
-import type { GameModeType } from "@/utils/typeBoard/types";
+import type { GameModeType, PieceType } from "@/utils/typeBoard/types";
 import { resetGame } from "@/utils/resetGame/resetGame";
 import { handleClickPiece } from "@/utils/logicChess/handleClickPiece";
 import styles from "./Board.module.css";
+import MovingPiece from "../Piece/MovingPiece";
+import { useSettings } from "@/hooks/useSettings";
 
 export default function Board({
   gameState,
@@ -16,7 +18,6 @@ export default function Board({
   transmissionMove,
   gameId,
   resign,
-  game,
 }: {
   gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
@@ -28,8 +29,18 @@ export default function Board({
   ) => void;
   gameId?: string | null;
   resign?: (gameId: string) => void;
-  game: ReturnType<typeof useChessGame>;
 }) {
+  const { settings } = useSettings();
+  const boardRef = useRef<HTMLDivElement>(null);
+  const [movingPiece, setMovingPiece] = useState<{
+    piece: PieceType;
+    fromRow: number;
+    fromCol: number;
+    toRow: number;
+    toCol: number;
+  } | null>(null);
+  const game = useChessGame();
+
   const {
     board,
     setBoard,
@@ -53,21 +64,33 @@ export default function Board({
     setCapturedPieces,
   } = game;
 
-  // 🚀 ДЕЛЕГИРУЕМ СОБЫТИЯ ИЗ Square В Board
+  // ДЕЛЕГИРУЕМ СОБЫТИЯ ИЗ Square В Board
   const handleSquareClick = (e: React.MouseEvent, row: number, col: number) => {
     const piece = board[row][col];
     handleClickPiece(e, piece, row, col, {
-      ...game, // ← ВСЁ, ЧТО ЕСТЬ
-      gameState, // ← ДОБАВЛЯЕМ gameState
-      gameId, // ← ДОБАВЛЯЕМ gameId
-      transmissionMove, // ← ДОБАВЛЯЕМ transmissionMove
+      ...game,
+      settings,
+      gameState,
+      gameId,
+      transmissionMove,
+      setMovingPiece,
+      boardRef,
     });
+    console.log("Клик");
   };
 
   return (
     <div className={styles.boardContainer}>
       <div className={styles.board}>
-        <div className={styles.boardGame}>
+        <div
+          ref={boardRef}
+          className={styles.boardGame}
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            transform: "translateZ(0)",
+          }}
+        >
           {board.map((row, rowIdx) =>
             row.map((piece, colIdx) => {
               const isLight = (rowIdx + colIdx) % 2 === 0;
@@ -82,10 +105,16 @@ export default function Board({
                 lastMove.to[0] === rowIdx &&
                 lastMove.to[1] === colIdx;
 
+              // Если сейчас анимируется эта фигура, не показываем её в статичной позиции
+              const isMovingPiece =
+                movingPiece &&
+                movingPiece.fromRow === rowIdx &&
+                movingPiece.fromCol === colIdx;
+
               return (
                 <Square
                   key={`${rowIdx}-${colIdx}`}
-                  piece={piece}
+                  piece={isMovingPiece ? null : piece} // Скрываем фигуру во время анимации
                   rowIdx={rowIdx}
                   colIdx={colIdx}
                   isLight={isLight}
@@ -94,10 +123,23 @@ export default function Board({
                   possibleMove={possibleMove}
                   gameState={gameState}
                   onClick={(e) => handleSquareClick(e, rowIdx, colIdx)}
-                  gameId={gameId}
                 />
               );
             })
+          )}
+          {/* Отдельно рендерим анимируемую фигуру */}
+          {movingPiece && boardRef.current && (
+            <MovingPiece
+              piece={movingPiece.piece}
+              fromRow={movingPiece.fromRow}
+              fromCol={movingPiece.fromCol}
+              toRow={movingPiece.toRow}
+              toCol={movingPiece.toCol}
+              boardElement={boardRef.current}
+              onMoveComplete={() => {
+                setMovingPiece(null);
+              }}
+            />
           )}
         </div>
       </div>

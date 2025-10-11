@@ -41,6 +41,15 @@ export function makeMove(
 
   // === 1. Проверка, превращение пешки ===
   if (piece?.type === "pawn" && (to.row === 0 || to.row === 7)) {
+    const capturedPiece = newBoard[to.row][to.col];
+
+    // Добавляем в capturedPieces, если есть взятие
+    if (capturedPiece) {
+      setCapturedPieces((prev) => ({
+        ...prev,
+        [capturedPiece.color]: [...prev[capturedPiece.color], capturedPiece],
+      }));
+    }
     newBoard[to.row][to.col] = piece;
     setBoard(newBoard);
 
@@ -141,10 +150,10 @@ export function makeMove(
         currentPlayer: "black",
         gameState: "vs-ai",
       });
-    }, 600);
+    }, 800);
   }
 
-  // ✅ ✅ ✅ КЛЮЧЕВОЙ ШАГ: ОТПРАВКА ХОДА НА СЕРВЕР — ЕСЛИ ЭТО ОНЛАЙН И НЕ ПРЕВРАЩЕНИЕ
+  // КЛЮЧЕВОЙ ШАГ: ОТПРАВКА ХОДА НА СЕРВЕР — ЕСЛИ ЭТО ОНЛАЙН И НЕ ПРЕВРАЩЕНИЕ
   if (
     gameState?.startsWith("online-") &&
     gameId &&
