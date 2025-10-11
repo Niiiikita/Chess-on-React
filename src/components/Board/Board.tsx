@@ -18,6 +18,7 @@ export default function Board({
   transmissionMove,
   gameId,
   resign,
+  game,
 }: {
   gameState: GameModeType;
   setGameState: React.Dispatch<React.SetStateAction<GameModeType>>;
@@ -29,6 +30,7 @@ export default function Board({
   ) => void;
   gameId?: string | null;
   resign?: (gameId: string) => void;
+  game: ReturnType<typeof useChessGame>;
 }) {
   const { settings } = useSettings();
   const boardRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,6 @@ export default function Board({
     toRow: number;
     toCol: number;
   } | null>(null);
-  const game = useChessGame();
 
   const {
     board,
